@@ -1,316 +1,314 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusOS - Future Network OS</title>
-    <style>
-        :root {
-            --bg-color: #05050a;
-            --panel-bg: rgba(15, 15, 30, 0.75);
-            --accent: #00ffcc;
-            --accent-glow: rgba(0, 255, 204, 0.4);
-            --text-color: #e0e0ff;
-            --border: rgba(0, 255, 204, 0.3);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-color); color: var(--text-color); }
-
-        /* Achtergrond Netwerk Effect */
-        #network-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-
-        /* Login Scherm */
-        #lock-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 10, 0.95); backdrop-filter: blur(10px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; transition: opacity 0.5s ease;
-        }
-        .login-box {
-            background: var(--panel-bg); border: 1px solid var(--accent);
-            padding: 40px; border-radius: 12px; box-shadow: 0 0 20px var(--accent-glow);
-            text-align: center; width: 320px;
-        }
-        .login-box h2 { margin-bottom: 20px; color: var(--accent); letter-spacing: 2px; }
-        .login-box input {
-            width: 100%; padding: 10px; margin-bottom: 15px; background: transparent;
-            border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: center;
-        }
-        .login-box button {
-            width: 100%; padding: 10px; background: var(--accent); border: none;
-            color: #000; font-weight: bold; border-radius: 4px; cursor: pointer;
-            box-shadow: 0 0 10px var(--accent-glow); transition: 0.2s;
-        }
-        .login-box button:hover { background: #fff; }
-
-        /* Desktop Omgeving */
-        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
-
-        /* Taakbalk */
-        .taskbar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
-            background: var(--panel-bg); border-top: 1px solid var(--border);
-            backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; z-index: 1000;
-        }
-        .taskbar-left, .taskbar-right { display: flex; gap: 15px; align-items: center; }
-        .btn-os {
-            background: transparent; border: 1px solid var(--border); color: var(--text-color);
-            padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-os:hover { background: var(--accent); color: #000; border-color: var(--accent); }
-
-        /* Venster Systeem */
-        .window {
-            position: absolute; top: 100px; left: 100px; width: 450px; height: 350px;
-            background: rgba(10, 10, 20, 0.85); border: 1px solid var(--accent);
-            border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; overflow: hidden; resize: both;
-            backdrop-filter: blur(5px); z-index: 10;
-        }
-        .window-header {
-            background: rgba(0, 255, 204, 0.1); padding: 8px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); cursor: move;
-        }
-        .window-title { font-size: 14px; color: var(--accent); }
-        .window-controls button {
-            background: none; border: none; color: var(--text-color); cursor: pointer; font-size: 14px; margin-left: 5px;
-        }
-        .window-controls button:hover { color: var(--accent); }
-        .window-content { padding: 15px; flex-grow: 1; overflow-y: auto; }
-
-        /* Instellingen Paneel */
-        .settings-panel {
-            position: absolute; top: 60px; right: 20px; width: 300px;
-            background: var(--panel-bg); border: 1px solid var(--border);
-            padding: 15px; border-radius: 6px; z-index: 2000; display: none;
-            backdrop-filter: blur(10px);
-        }
-        .settings-panel label { display: block; margin-bottom: 10px; font-size: 12px; }
-        .settings-panel input[type="text"] { width: 100%; padding: 6px; background: #000; border: 1px solid var(--border); color: #fff; margin-top: 5px; margin-bottom: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aetheria NetOS - Quantum Node</title>
+<style>
+:root {
+--bg-deep: #02040a;
+--panel-bg: rgba(10, 15, 30, 0.85);
+--accent-cyan: #00f0ff;
+--accent-purple: #9d00ff;
+--accent-glow: rgba(0, 240, 255, 0.35);
+--text-main: #c8d8e8;
+--border-glow: rgba(0, 240, 255, 0.4);
+}
+​* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Share Tech Mono', monospace, sans-serif; }
+body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-deep); color: var(--text-main); }
+​/* Holografische Netwerk Achtergrond */
+#quantum-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+​/* Kwantum Inlog Scherm */
+#auth-gate {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(2, 4, 10, 0.96); backdrop-filter: blur(15px);
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+z-index: 9999; transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.auth-terminal {
+background: var(--panel-bg); border: 1px solid var(--accent-cyan);
+padding: 45px; border-radius: 8px; box-shadow: 0 0 30px var(--accent-glow);
+text-align: center; width: 360px; position: relative;
+}
+.auth-terminal::before {
+content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+}
+.auth-terminal h1 { font-size: 22px; color: var(--accent-cyan); letter-spacing: 4px; margin-bottom: 8px; }
+.auth-terminal p { font-size: 11px; color: #5a7a9a; margin-bottom: 25px; text-transform: uppercase; }
+.auth-terminal input {
+width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.6);
+border: 1px solid var(--border-glow); color: var(--accent-cyan); border-radius: 4px; text-align: center; font-size: 16px; outline: none;
+}
+.auth-terminal button {
+width: 100%; padding: 12px; background: var(--accent-cyan); border: none;
+color: #02040a; font-weight: bold; border-radius: 4px; cursor: pointer;
+box-shadow: 0 0 15px var(--accent-glow); transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
+}
+.auth-terminal button:hover { background: #fff; box-shadow: 0 0 25px #fff; }
+​/* Systeem Desktop */
+#nexus-desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
+​/* Bovenste Besturingsbalk */
+.nexus-taskbar {
+position: absolute; top: 0; left: 0; width: 100%; height: 45px;
+background: var(--panel-bg); border-bottom: 1px solid var(--border-glow);
+backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between;
+padding: 0 25px; z-index: 1000;
+}
+.taskbar-group { display: flex; gap: 12px; align-items: center; }
+.nexus-btn {
+background: rgba(0, 240, 255, 0.05); border: 1px solid var(--border-glow); color: var(--text-main);
+padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: 0.2s; font-size: 12px; text-transform: uppercase;
+}
+.nexus-btn:hover { background: var(--accent-cyan); color: #02040a; border-color: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-glow); }
+​/* Flexibel Venster Systeem */
+.quantum-window {
+position: absolute; top: 80px; left: 100px; width: 500px; height: 400px;
+background: rgba(8, 12, 24, 0.9); border: 1px solid var(--accent-cyan);
+border-radius: 6px; box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+display: flex; flex-direction: column; overflow: hidden; resize: both;
+backdrop-filter: blur(8px); z-index: 10;
+}
+.window-header {
+background: linear-gradient(90deg, rgba(0,240,255,0.15), transparent); padding: 8px 12px;
+display: flex; justify-content: space-between; align-items: center;
+border-bottom: 1px solid var(--border-glow); cursor: move; user-select: none;
+}
+.window-title { font-size: 13px; color: var(--accent-cyan); letter-spacing: 1px; }
+.window-controls button {
+background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 14px; margin-left: 8px;
+}
+.window-controls button:hover { color: var(--accent-cyan); text-shadow: 0 0 8px var(--accent-cyan); }
+.window-body { padding: 15px; flex-grow: 1; overflow-y: auto; }
+​/* Instellingen & Configuratie Container */
+.config-overlay {
+position: absolute; top: 55px; right: 20px; width: 320px;
+background: var(--panel-bg); border: 1px solid var(--border-glow);
+padding: 20px; border-radius: 6px; z-index: 2000; display: none;
+backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.config-overlay h3 { color: var(--accent-cyan); font-size: 14px; margin-bottom: 12px; letter-spacing: 1px; }
+.config-overlay label { display: block; margin-bottom: 12px; font-size: 11px; color: #8ab0d0; }
+.config-overlay input[type="text"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-glow); color: #fff; margin-top: 5px; border-radius: 3px; font-size: 12px; }
+​/* App Launcher Grid */
+.app-launcher-modal {
+position: absolute; top: 55px; left: 20px; width: 300px;
+background: var(--panel-bg); border: 1px solid var(--border-glow);
+padding: 15px; border-radius: 6px; z-index: 2000; display: none;
+backdrop-filter: blur(12px);
+}
+.app-launcher-modal input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-glow); color: #fff; margin-bottom: 10px; font-size: 11px; border-radius: 3px; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <!-- Netwerk Achtergrond Animatie -->
-    <canvas id="network-canvas"></canvas>
-
-    <!-- Inlog Scherm -->
-    <div id="lock-screen">
-        <div class="login-box">
-            <h2>NEXUS OS</h2>
-            <p style="font-size: 11px; margin-bottom: 15px; color: #888;">Beveiligd Netwerk Knooppunt</p>
-            <input type="password" id="pass-input" placeholder="Voer toegangscode in...">
-            <button onclick="app.login()">VERIFIËREN</button>
-            <button onclick="app.toggleLogin(false)" style="background:transparent; border:none; color:#666; margin-top:15px; cursor:pointer; font-size:10px;">Inlogbeveiliging uitschakelen</button>
-        </div>
-    </div>
-
-    <!-- Desktop -->
-    <div id="desktop">
-        <!-- Taakbalk -->
-        <div class="taskbar">
-            <div class="taskbar-left">
-                <button class="btn-os" onclick="app.openSettings()">⚙ Systeem</button>
-                <button class="btn-os" onclick="app.openAppModal()">+ App Installeren</button>
-                <button class="btn-os" onclick="app.syncWithSheets()">☁ Sync Google Sheets</button>
-            </div>
-            <div class="taskbar-right">
-                <span id="system-clock" style="font-size: 12px; color: var(--accent);">00:00:00</span>
-            </div>
-        </div>
-
-        <!-- Instellingen Paneel -->
-        <div id="settings-panel" class="settings-panel">
-            <h3 style="color: var(--accent); margin-bottom: 10px; font-size: 14px;">Systeeminstellingen</h3>
-            <label>
-                <input type="checkbox" id="toggle-login-check" onchange="app.toggleLoginSetting(this)"> Inlogscherm Actief
-            </label>
-            <label>
-                Google Sheets Webhook URL:
-                <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/.../exec">
-            </label>
-            <button class="btn-os" style="width:100%; margin-top:5px;" onclick="app.saveSettings()">Opslaan</button>
-        </div>
-    </div>
-
-    <script>
-        /* --- GELUIDSENGINE (Web Audio API) --- */
-        const SoundFX = {
-            ctx: null,
-            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-            beep(freq=440, duration=0.1, type='sine') {
-                this.init();
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = type; osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
-                osc.connect(gain); gain.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + duration);
-            },
-            startup() {
-                this.init();
-                [300, 500, 800].forEach((f, i) => setTimeout(() => this.beep(f, 0.15, 'triangle'), i * 120));
-            }
-        };
-
-        /* --- NETWERK ACHTERGROND ANIMATIE --- */
-        const canvas = document.getElementById('network-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        for(let i=0; i<50; i++) {
-            particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 });
-        }
-        function animateNetwork() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(0, 255, 204, 0.5)';
-            ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)';
-            particles.forEach((p, index) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                ctx.fillRect(p.x, p.y, 2, 2);
-                for(let j = index + 1; j < particles.length; j++) {
-                    let p2 = particles[j];
-                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if(dist < 120) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
-                }
-            });
-            requestAnimationFrame(animateNetwork);
-        }
-        animateNetwork();
-
-        /* --- OS KERN LOGICA --- */
-        class NexusOS {
-            constructor() {
-                this.loginEnabled = localStorage.getItem('nexus_login') !== 'false';
-                this.sheetsUrl = localStorage.getItem('nexus_sheets') || '';
-                document.getElementById('sheets-url').value = this.sheetsUrl;
-                document.getElementById('toggle-login-check').checked = this.loginEnabled;
-
-                if (!this.loginEnabled) {
-                    document.getElementById('lock-screen').style.display = 'none';
-                    document.getElementById('desktop').style.display = 'block';
-                    SoundFX.startup();
-                }
-
-                setInterval(() => {
-                    document.getElementById('system-clock').innerText = new Date().toLocaleTimeString();
-                }, 1000);
-            }
-
-            login() {
-                SoundFX.beep(600, 0.1);
-                document.getElementById('lock-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('lock-screen').style.display = 'none';
-                    document.getElementById('desktop').style.display = 'block';
-                    SoundFX.startup();
-                }, 500);
-            }
-
-            toggleLogin(enabled) {
-                this.loginEnabled = enabled;
-                localStorage.setItem('nexus_login', enabled);
-                if(!enabled) this.login();
-            }
-
-            toggleLoginSetting(el) {
-                this.toggleLogin(el.checked);
-            }
-
-            openSettings() {
-                SoundFX.beep(400, 0.05);
-                let panel = document.getElementById('settings-panel');
-                panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            }
-
-            saveSettings() {
-                this.sheetsUrl = document.getElementById('sheets-url').value;
-                localStorage.setItem('nexus_sheets', this.sheetsUrl);
-                SoundFX.beep(800, 0.1);
-                this.openSettings();
-            }
-
-            openAppModal() {
-                let url = prompt("Voer de URL in van de externe app (1 file per app, bijv. je GitHub raw link naar een .js bestand):");
-                if(url) this.installAndRunApp(url);
-            }
-
-            /* Dynamisch een app laden via 1 apart file */
-            async installAndRunApp(url) {
-                try {
-                    SoundFX.beep(500, 0.1);
-                    let response = await fetch(url);
-                    let scriptText = await response.text();
-                    
-                    // Maak unieke venster container
-                    let winId = 'app-win-' + Date.now();
-                    let win = document.createElement('div');
-                    win.className = 'window';
-                    win.id = winId;
-                    win.innerHTML = `
-                        <div class="window-header" onmousedown="app.dragWindow(event, '${winId}')">
-                            <span class="window-title">Externe App</span>
-                            <div class="window-controls">
-                                <button onclick="document.getElementById('${winId}').remove()">✕</button>
-                            </div>
-                        </div>
-                        <div class="window-content" id="content-${winId}"></div>
-                    `;
-                    document.getElementById('desktop').appendChild(win);
-
-                    // Voer de app code uit binnen de context
-                    let executeApp = new Function('container', scriptText);
-                    executeApp(document.getElementById(`content-${winId}`));
-                } catch(e) {
-                    alert("Fout bij laden van app: " + e.message);
-                }
-            }
-
-            dragWindow(e, winId) {
-                let win = document.getElementById(winId);
-                let startX = e.clientX, startY = e.clientY;
-                let startLeft = win.offsetLeft, startTop = win.offsetTop;
-
-                function moveAt(e) {
-                    win.style.left = (startLeft + e.clientX - startX) + 'px';
-                    win.style.top = (startTop + e.clientY - startY) + 'px';
-                }
-                document.addEventListener('mousemove', moveAt);
-                document.onmouseup = () => document.removeEventListener('mousemove', moveAt);
-            }
-
-            async syncWithSheets() {
-                if(!this.sheetsUrl) {
-                    alert("Stel eerst je Google Sheets Webhook URL in via Systeem instellingen.");
-                    this.openSettings();
-                    return;
-                }
-                SoundFX.beep(700, 0.1);
-                try {
-                    await fetch(this.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ action: 'sync', timestamp: new Date().toISOString() })
-                    });
-                    alert("Status succesvol gesynchroniseerd naar Google Sheet!");
-                } catch(e) {
-                    alert("Synchronisatiefout: " + e.message);
-                }
-            }
-        }
-
-        const app = new NexusOS();
-    </script>
+​<!-- Netwerk Canvas Achtergrond -->
+<canvas id="quantum-canvas"></canvas>
+​<!-- Inlogscherm Node -->
+<div id="auth-gate">
+<div class="auth-terminal">
+<h1>AETHERIA OS</h1>
+<p>Netwerk Terminal v4.8</p>
+<input type="password" id="auth-code" placeholder="ENTER ACCESS KEY">
+<button onclick="netOS.authenticate()">AUTHENTICEER</button>
+<button onclick="netOS.toggleAuthGate(false)" style="background:transparent; border:none; color:#406080; margin-top:15px; font-size:10px; box-shadow:none;">Beveiliging Uitschakelen</button>
+</div>
+</div>
+​<!-- Systeem Desktop -->
+<div id="nexus-desktop">
+<!-- Taakbalk -->
+<div class="nexus-taskbar">
+<div class="taskbar-group">
+<span style="color: var(--accent-cyan); font-weight: bold; letter-spacing: 2px;">⚡ AETHERIA_NETOS</span>
+<button class="nexus-btn" onclick="netOS.toggleAppStore()">+ App Laden (.html)</button>
+<button class="nexus-btn" onclick="netOS.toggleConfigPanel()">⚙ Systeemconfiguratie</button>
+<button class="nexus-btn" onclick="netOS.syncSheet()">☁ Cloud Sync (Google Sheets)</button>
+</div>
+<div class="taskbar-group">
+<span id="quantum-clock" style="font-size: 13px; color: var(--accent-cyan);">00:00:00</span>
+</div>
+</div>
+​<!-- Configuratiescherm -->
+<div id="config-panel" class="config-overlay">
+<h3>Systeeminstellingen</h3>
+<label>
+<input type="checkbox" id="auth-toggle-checkbox" onchange="netOS.updateAuthSetting(this)"> Inlogscherm Actief
+</label>
+<label>
+Google Sheets Webhook URL:
+<input type="text" id="sheets-endpoint" placeholder="https://script.google.com/macros/s/.../exec">
+</label>
+<button class="nexus-btn" style="width:100%; margin-top:5px;" onclick="netOS.saveConfig()">Instellingen Opslaan</button>
+</div>
+​<!-- App Launcher Paneel -->
+<div id="app-store-panel" class="app-launcher-modal">
+<h3 style="color:var(--accent-cyan); font-size:13px; margin-bottom:8px;">HTML App Installeren</h3>
+<input type="text" id="app-raw-url" placeholder="GitHub Raw URL naar .html app bestand...">
+<button class="nexus-btn" style="width:100%;" onclick="netOS.loadExternalApp()">App Uitvoeren</button>
+</div>
+</div>
+​<script>
+/* --- GELUIDSENGINE (Web Audio API) --- */
+const SoundSystem = {
+ctx: null,
+init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+pulse(freq=440, duration=0.08, type='sine') {
+this.init();
+try {
+let osc = this.ctx.createOscillator();
+let gain = this.ctx.createGain();
+osc.type = type; osc.frequency.value = freq;
+gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+osc.connect(gain); gain.connect(this.ctx.destination);
+osc.start(); osc.stop(this.ctx.currentTime + duration);
+} catch(e) {}
+},
+bootSound() {
+this.init();
+[200, 400, 600, 900].forEach((f, i) => setTimeout(() => this.pulse(f, 0.12, 'triangle'), i * 100));
+}
+};
+​/* --- NETWERK ACHTERGROND VISUALISATIE --- */
+const canvas = document.getElementById('quantum-canvas');
+const ctx = canvas.getContext('2d');
+let nodes = [];
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+​for(let i=0; i<45; i++) {
+nodes.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4 });
+}
+function renderNetwork() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = 'rgba(0, 240, 255, 0.6)';
+ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
+nodes.forEach((n, idx) => {
+n.x += n.vx; n.y += n.vy;
+if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
+if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
+ctx.fillRect(n.x, n.y, 2, 2);
+for(let j = idx + 1; j < nodes.length; j++) {
+let n2 = nodes[j];
+let dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+if(dist < 130) { ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(n2.x, n2.y); ctx.stroke(); }
+}
+});
+requestAnimationFrame(renderNetwork);
+}
+renderNetwork();
+​/* --- NETOS KERN --- */
+class NetworkOS {
+constructor() {
+this.authActive = localStorage.getItem('aetheria_auth') !== 'false';
+this.webhookUrl = localStorage.getItem('aetheria_sheets') || '';
+​document.getElementById('sheets-endpoint').value = this.webhookUrl;
+document.getElementById('auth-toggle-checkbox').checked = this.authActive;
+​if (!this.authActive) {
+document.getElementById('auth-gate').style.display = 'none';
+document.getElementById('nexus-desktop').style.display = 'block';
+SoundSystem.bootSound();
+}
+​setInterval(() => {
+document.getElementById('quantum-clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
+}
+​authenticate() {
+SoundSystem.pulse(750, 0.1, 'square');
+document.getElementById('auth-gate').style.opacity = '0';
+setTimeout(() => {
+document.getElementById('auth-gate').style.display = 'none';
+document.getElementById('nexus-desktop').style.display = 'block';
+SoundSystem.bootSound();
+}, 500);
+}
+​toggleAuthGate(active) {
+this.authActive = active;
+localStorage.setItem('aetheria_auth', active);
+if(!active) this.authenticate();
+}
+​updateAuthSetting(el) {
+this.toggleAuthGate(el.checked);
+}
+​toggleConfigPanel() {
+SoundSystem.pulse(350, 0.05);
+let p = document.getElementById('config-panel');
+p.style.display = p.style.display === 'block' ? 'none' : 'block';
+document.getElementById('app-store-panel').style.display = 'none';
+}
+​toggleAppStore() {
+SoundSystem.pulse(400, 0.05);
+let p = document.getElementById('app-store-panel');
+p.style.display = p.style.display === 'block' ? 'none' : 'block';
+document.getElementById('config-panel').style.display = 'none';
+}
+​saveConfig() {
+this.webhookUrl = document.getElementById('sheets-endpoint').value;
+localStorage.setItem('aetheria_sheets', this.webhookUrl);
+SoundSystem.pulse(880, 0.1);
+this.toggleConfigPanel();
+}
+​/* LAAD APPS DIE GEHEEL IN HTML BESTANDEN OP GITHUB STAAN */
+async loadExternalApp() {
+let url = document.getElementById('app-raw-url').value;
+if(!url) return alert("Voer een geldige GitHub Raw HTML URL in.");
+​try {
+SoundSystem.pulse(550, 0.08);
+let response = await fetch(url);
+let htmlContent = await response.text();
+​let winId = 'win-' + Date.now();
+let win = document.createElement('div');
+win.className = 'quantum-window';
+win.id = winId;
+win.innerHTML = <div class="window-header" onmousedown="netOS.initDrag(event, '${winId}')"> <span class="window-title">Remote HTML Node App</span> <div class="window-controls"> <button onclick="document.getElementById('${winId}').remove()">✕</button> </div> </div> <div class="window-body" id="body-${winId}"></div>;
+document.getElementById('nexus-desktop').appendChild(win);
+​// Injecteer de volledige HTML inhoud inclusief eventuele interne <style> en <script> tags
+let bodyContainer = document.getElementById(body-${winId});
+bodyContainer.innerHTML = htmlContent;
+​// Voer eventuele inline <script> elementen uit de geladen HTML handmatig uit zodat ze werken
+bodyContainer.querySelectorAll('script').forEach(oldScript => {
+let newScript = document.createElement('script');
+Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+oldScript.parentNode.replaceChild(newScript, oldScript);
+});
+​this.toggleAppStore();
+} catch(e) {
+alert("Fout bij ophalen van HTML app vanuit GitHub: " + e.message);
+}
+}
+​initDrag(e, winId) {
+let win = document.getElementById(winId);
+let startX = e.clientX, startY = e.clientY;
+let startLeft = win.offsetLeft, startTop = win.offsetTop;
+​function onMove(e) {
+win.style.left = (startLeft + e.clientX - startX) + 'px';
+win.style.top = (startTop + e.clientY - startY) + 'px';
+}
+document.addEventListener('mousemove', onMove);
+document.onmouseup = () => document.removeEventListener('mousemove', onMove);
+}
+​async syncSheet() {
+if(!this.webhookUrl) {
+alert("Stel eerst je Google Sheets webhook URL in via de systeemconfiguratie.");
+this.toggleConfigPanel();
+return;
+}
+SoundSystem.pulse(700, 0.1);
+try {
+await fetch(this.webhookUrl, {
+method: 'POST',
+mode: 'no-cors',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({ node: 'Aetheria-Node-1', status: 'active', time: new Date().toISOString() })
+});
+alert("Netwerkstatus succesvol gesynchroniseerd met Google Spreadsheet!");
+} catch(e) {
+alert("Google Sheets sync mislukt: " + e.message);
+}
+}
+}
+​const netOS = new NetworkOS();
+</script>
 </body>
 </html>
-

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows RT - Cloud Edition</title>
+    <title>Windows RT - Network Edition</title>
     <style>
         :root {
             --rt-blue: #0078d7;
@@ -16,7 +16,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #005a9e; color: var(--rt-light); }
 
-        /* Achtergrond (Windows RT stijl kleurverloop) */
+        /* Achtergrond */
         #wallpaper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #0078d7 0%, #104175 100%);
@@ -50,10 +50,10 @@
         }
         .lock-card button:hover { background: #0063b1; }
 
-        /* Desktop & Metro Startscherm Omgeving */
+        /* Desktop Omgeving */
         #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
 
-        /* Windows RT Startscherm Tegels (Dashboard) */
+        /* Metro Startscherm (Tegels) */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 48px);
             padding: 40px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
@@ -70,7 +70,7 @@
         .rt-tile span { font-size: 32px; }
         .rt-tile label { font-size: 14px; font-weight: 500; cursor: pointer; }
 
-        /* Taakbalk (Windows RT Stijl onderaan) */
+        /* Taakbalk */
         .taskbar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
             background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); display: flex;
@@ -106,7 +106,7 @@
         .window-controls .btn-close:hover { background: #e81123; color: #fff; }
         .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
 
-        /* Configuratiescherm Popup */
+        /* PC-Instellingen Popup */
         .settings-popup {
             position: absolute; bottom: 60px; right: 20px; width: 340px;
             background: rgba(27, 27, 27, 0.95); border: 1px solid rgba(255,255,255,0.2);
@@ -125,16 +125,16 @@
         <div class="lock-card">
             <div class="lock-avatar">RT</div>
             <h2 style="font-weight: 400; margin-bottom: 5px; font-size: 20px;">Windows RT</h2>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">Cloud Network User</p>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">Network User</p>
             <input type="password" id="pass-input" placeholder="Wachtwoord invoeren..." autofocus>
             <button onclick="rtOS.login()">Aanmelden</button>
             <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:15px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
         </div>
     </div>
 
-    <!-- Desktop & Metro Startscherm -->
+    <!-- Desktop -->
     <div id="desktop">
-        <!-- Metro Startscherm (Tegels) -->
+        <!-- Metro Startscherm -->
         <div id="start-screen">
             <div class="start-header">Start</div>
             <div class="tiles-grid">
@@ -153,7 +153,7 @@
             </div>
         </div>
 
-        <!-- Taakbalk Onder -->
+        <!-- Taakbalk -->
         <div class="taskbar">
             <div class="taskbar-left">
                 <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
@@ -161,7 +161,7 @@
             </div>
             <div class="taskbar-right">
                 <div class="sys-tray" onclick="rtOS.openSettings()" title="Systeemstatus">
-                    <span>🔊 🌐</span>
+                    <span>🔊 🌐 ☁️</span>
                     <span id="system-time">00:00</span>
                 </div>
             </div>
@@ -182,7 +182,7 @@
     </div>
 
     <script>
-        /* --- AUDIO GELUIDSENGINE --- */
+        /* --- GELUIDSENGINE --- */
         const SoundFX = {
             ctx: null,
             init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -326,7 +326,6 @@
             async loadHTMLApp(url) {
                 try {
                     SoundFX.click();
-                    // Sluit het startscherm bij openen van app
                     document.getElementById('start-screen').style.display = 'none';
 
                     let res = await fetch(url);

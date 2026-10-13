@@ -3,126 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moonbase Alpha OS - Space 1999 Edition</title>
+    <title>Retro Dual-Theme Network OS</title>
     <style>
-        :root {
+        /* --- THEMA 1: SPACE 1999 (Oranje / Retro Sci-Fi) --- */
+        body.theme-space1999 {
             --bg-color: #080a0f;
             --panel-bg: #111622;
-            --accent-orange: #ff7700;
-            --accent-green: #00ff66;
-            --accent-red: #ff3333;
+            --accent: #ff7700;
+            --accent-glow: rgba(255, 119, 0, 0.4);
             --text-main: #ffbb55;
-            --border-retro: 2px solid #ff7700;
+            --border-style: 2px solid #ff7700;
+            --font-family: 'Courier New', Courier, monospace;
+            --wallpaper-bg: radial-gradient(circle, #1a2238 0%, #05070a 100%);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-color); color: var(--text-main); }
+        /* --- THEMA 2: GROENE TERMINAL (Eerste Home Computer / CRT Groen) --- */
+        body.theme-terminal {
+            --bg-color: #020802;
+            --panel-bg: #051405;
+            --accent: #00ff66;
+            --accent-glow: rgba(0, 255, 102, 0.4);
+            --text-main: #00ff66;
+            --border-style: 1px solid #00ff66;
+            --font-family: 'Courier New', Courier, monospace;
+            --wallpaper-bg: radial-gradient(circle, #032003 0%, #010401 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); text-transform: uppercase; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-color); color: var(--text-main); transition: background 0.3s, color 0.3s; }
 
         /* CRT Scanline Effect */
         body::after {
             content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
             z-index: 99999; background-size: 100% 3px, 3px 100%; pointer-events: none;
         }
 
-        /* Achtergrond Sterren / Raster */
         #wallpaper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a2238 0%, #05070a 100%);
-            z-index: 0;
+            background: var(--wallpaper-bg); z-index: 0; transition: background 0.3s;
         }
 
-        /* Inlogscherm (Alpha Security) */
+        /* Inlogscherm */
         #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(8, 10, 15, 0.95); display: flex; flex-direction: column;
+            background: rgba(2, 4, 8, 0.96); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.4s ease;
         }
         .lock-box {
-            background: var(--panel-bg); border: var(--border-retro);
-            padding: 40px; box-shadow: 0 0 25px rgba(255, 119, 0, 0.4);
+            background: var(--panel-bg); border: var(--border-style);
+            padding: 40px; box-shadow: 0 0 25px var(--accent-glow);
             text-align: center; width: 380px;
         }
-        .lock-box h2 { color: var(--accent-orange); margin-bottom: 10px; letter-spacing: 3px; font-size: 20px; }
+        .lock-box h2 { color: var(--accent); margin-bottom: 10px; letter-spacing: 3px; font-size: 20px; }
         .lock-box p { font-size: 10px; color: #8899aa; margin-bottom: 25px; }
         .lock-box input {
             width: 100%; padding: 12px; margin-bottom: 15px; background: #000;
-            border: 1px solid var(--accent-orange); color: var(--accent-green); text-align: center; font-size: 16px;
+            border: 1px solid var(--accent); color: var(--text-main); text-align: center; font-size: 16px;
         }
         .lock-box button {
-            width: 100%; padding: 12px; background: var(--accent-orange); border: none;
+            width: 100%; padding: 12px; background: var(--accent); border: none;
             color: #000; font-weight: bold; cursor: pointer; font-size: 14px; letter-spacing: 2px; transition: 0.2s;
         }
-        .lock-box button:hover { background: #ffaa33; }
+        .lock-box button:hover { opacity: 0.8; }
 
         #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
 
-        /* Alpha Taakbalk Onderaan */
+        /* Taakbalk */
         .taskbar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
-            background: var(--panel-bg); border-top: var(--border-retro);
+            background: var(--panel-bg); border-top: var(--border-style);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; z-index: 1000;
+            padding: 0 20px; z-index: 1000; transition: background 0.3s, border-color 0.3s;
         }
         .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 10px; }
         .taskbar-btn {
-            background: #000; border: 1px solid var(--accent-orange); color: var(--accent-orange);
+            background: #000; border: 1px solid var(--accent); color: var(--accent);
             padding: 8px 14px; cursor: pointer; font-size: 11px; letter-spacing: 1px; transition: 0.2s;
         }
-        .taskbar-btn:hover { background: var(--accent-orange); color: #000; }
+        .taskbar-btn:hover { background: var(--accent); color: #000; }
         
         .sys-tray {
-            font-size: 11px; color: var(--accent-green); display: flex; align-items: center; gap: 15px;
-            border: 1px solid rgba(0,255,102,0.3); padding: 5px 10px; background: #000;
+            font-size: 11px; color: var(--text-main); display: flex; align-items: center; gap: 15px;
+            border: 1px solid var(--accent); padding: 5px 10px; background: #000;
         }
 
-        /* Venstersysteem in Space 1999 Stijl */
+        /* Venstersysteem */
         .window {
             position: absolute; top: 70px; left: 100px; width: 620px; height: 460px;
-            background: var(--panel-bg); border: var(--border-retro);
+            background: var(--panel-bg); border: var(--border-style);
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             display: flex; flex-direction: column; overflow: hidden; resize: both; z-index: 10;
         }
         .window-header {
-            background: #1a2238; padding: 8px 12px; display: flex;
+            background: #000; padding: 8px 12px; display: flex;
             justify-content: space-between; align-items: center; cursor: move; user-select: none;
-            border-bottom: 1px solid var(--accent-orange);
+            border-bottom: var(--border-style);
         }
-        .window-title { font-size: 12px; font-weight: bold; color: var(--accent-orange); letter-spacing: 2px; }
+        .window-title { font-size: 12px; font-weight: bold; color: var(--accent); letter-spacing: 2px; }
         
-        /* Bovenste knoppenbalk: Minimaliseren, Maximaliseren, Uitdien (Sluiten) */
         .window-controls { display: flex; align-items: center; gap: 4px; }
         .window-controls button {
-            background: #000; border: 1px solid var(--accent-orange); width: 28px; height: 24px; cursor: pointer;
-            font-size: 11px; color: var(--accent-orange); display: flex; align-items: center; justify-content: center; transition: 0.1s;
+            background: #000; border: 1px solid var(--accent); width: 28px; height: 24px; cursor: pointer;
+            font-size: 11px; color: var(--accent); display: flex; align-items: center; justify-content: center; transition: 0.1s;
         }
-        .window-controls button:hover { background: var(--accent-orange); color: #000; }
-        .window-controls .btn-close:hover { background: var(--accent-red); border-color: var(--accent-red); color: #fff; }
+        .window-controls button:hover { background: var(--accent); color: #000; }
+        .window-controls .btn-close:hover { background: #ff3333; border-color: #ff3333; color: #fff; }
 
-        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #0b0f17; color: #fff; font-size: 13px; }
+        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #000; color: var(--text-main); font-size: 13px; }
 
-        /* Instellingen Popup */
+        /* Instellingen Popup met Thema-keuze */
         .settings-popup {
             position: absolute; bottom: 60px; right: 20px; width: 340px;
-            background: var(--panel-bg); border: var(--border-retro);
-            padding: 20px; z-index: 2000; display: none; box-shadow: 0 0 20px rgba(255,119,0,0.3);
+            background: var(--panel-bg); border: var(--border-style);
+            padding: 20px; z-index: 2000; display: none; box-shadow: 0 0 20px var(--accent-glow);
         }
-        .settings-popup label { display: block; margin-bottom: 15px; font-size: 11px; color: #8899aa; }
-        .settings-popup input[type="text"] { width: 100%; padding: 8px; background: #000; border: 1px solid var(--accent-orange); color: var(--accent-green); margin-top: 5px; font-size: 12px; }
+        .settings-popup label { display: block; margin-bottom: 12px; font-size: 11px; color: var(--text-main); }
+        .settings-popup select, .settings-popup input[type="text"] {
+            width: 100%; padding: 8px; background: #000; border: 1px solid var(--accent); color: var(--text-main); margin-top: 5px; font-size: 12px;
+        }
     </style>
 </head>
-<body>
+<body class="theme-space1999">
 
     <div id="wallpaper"></div>
 
-    <!-- Inlogscherm Moonbase Alpha -->
+    <!-- Inlogscherm -->
     <div id="lock-screen">
         <div class="lock-box">
-            <h2>MOONBASE ALPHA</h2>
-            <p>Main Computer Security Terminal</p>
-            <input type="password" id="pass-input" placeholder="Enter Security Code...">
-            <button onclick="alphaOS.login()">AUTHORIZE ACCESS</button>
-            <button onclick="alphaOS.toggleLogin(false)" style="background:transparent; border:none; color:#556677; margin-top:15px; cursor:pointer; font-size:9px;">Disable Security Bypass</button>
+            <h2>RETRO SYSTEM</h2>
+            <p>Select Theme & Authorize Access</p>
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="font-size: 10px; color: var(--accent);">Startup Theme:</label>
+                <select id="login-theme-select" style="width:100%; padding:8px; background:#000; border:1px solid var(--accent); color:var(--text-main); font-size:11px; margin-top:4px;">
+                    <option value="theme-space1999">Space: 1999 (Moonbase Alpha)</option>
+                    <option value="theme-terminal">Classic Home Computer (Green CRT)</option>
+                </select>
+            </div>
+            <input type="password" id="pass-input" placeholder="Security Code...">
+            <button onclick="retroOS.login()">INITIALIZE OS</button>
+            <button onclick="retroOS.toggleLogin(false)" style="background:transparent; border:none; color:#556677; margin-top:15px; cursor:pointer; font-size:9px;">Bypass Login</button>
         </div>
     </div>
 
@@ -130,34 +150,41 @@
     <div id="desktop">
         <div class="taskbar">
             <div class="taskbar-left">
-                <button class="taskbar-btn" onclick="alphaOS.openSettings()">[SYS] CONFIG</button>
-                <button class="taskbar-btn" onclick="alphaOS.openAppPrompt()">[+] LOAD MODULE</button>
+                <button class="taskbar-btn" onclick="retroOS.openSettings()">[SYS] CONFIG & THEMES</button>
+                <button class="taskbar-btn" onclick="retroOS.openAppPrompt()">[+] LOAD MODULE</button>
             </div>
             <div class="taskbar-right">
                 <div class="sys-tray">
-                    <span style="color:var(--accent-orange);">ALPHA-NET: ACTIVE</span>
+                    <span id="tray-theme-label">THEME: ACTIVE</span>
                     <span id="system-time">00:00:00</span>
                     <span id="system-date">01.01.1999</span>
                 </div>
             </div>
         </div>
 
-        <!-- Instellingen Popup -->
+        <!-- Instellingen Popup met Thema-wisselaar -->
         <div id="settings-panel" class="settings-popup">
-            <h3 style="color: var(--accent-orange); margin-bottom: 15px; font-size: 13px; letter-spacing: 1px;">Alpha System Controls</h3>
+            <h3 style="color: var(--accent); margin-bottom: 15px; font-size: 13px; letter-spacing: 1px;">System & Theme Control</h3>
             <label>
-                <input type="checkbox" id="login-toggle-check" onchange="alphaOS.toggleLoginSetting(this)"> Security Login Active
+                Active Retro Theme:
+                <select id="theme-switcher" onchange="retroOS.setTheme(this.value)">
+                    <option value="theme-space1999">Space: 1999 (Moonbase Alpha)</option>
+                    <option value="theme-terminal">Classic Green CRT Terminal</option>
+                </select>
+            </label>
+            <label>
+                <input type="checkbox" id="login-toggle-check" onchange="retroOS.toggleLoginSetting(this)"> Security Login Active
             </label>
             <label>
                 Google Sheets Webhook URL:
                 <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec">
             </label>
-            <button class="taskbar-btn" style="width:100%; margin-top:10px; background:var(--accent-orange); color:#000;" onclick="alphaOS.saveSettings()">Save Configuration</button>
+            <button class="taskbar-btn" style="width:100%; margin-top:10px; background:var(--accent); color:#000;" onclick="retroOS.saveSettings()">Save Configuration</button>
         </div>
     </div>
 
     <script>
-        /* --- SPACE 1999 AUDIO COMPUTER BIPS --- */
+        /* --- GELUIDSENGINE --- */
         const SoundFX = {
             ctx: null,
             init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -173,22 +200,33 @@
                     osc.start(); osc.stop(this.ctx.currentTime + duration);
                 } catch(e) {}
             },
-            startup() { [440, 880, 1320, 1760].forEach((f, i) => setTimeout(() => this.play(f, 0.1, 'square'), i * 80)); },
-            click() { this.play(1200, 0.02, 'sawtooth'); }
+            startup(theme) {
+                if(theme === 'theme-terminal') {
+                    [300, 450, 600].forEach((f, i) => setTimeout(() => this.play(f, 0.08, 'sine'), i * 60));
+                } else {
+                    [440, 880, 1320, 1760].forEach((f, i) => setTimeout(() => this.play(f, 0.1, 'square'), i * 80));
+                }
+            },
+            click() { this.play(1000, 0.02, 'sawtooth'); }
         };
 
-        class SpaceOS {
+        class RetroOS {
             constructor() {
-                this.loginEnabled = localStorage.getItem('alpha_login') !== 'false';
-                this.sheetsUrl = localStorage.getItem('alpha_sheets') || '';
+                this.loginEnabled = localStorage.getItem('retro_login') !== 'false';
+                this.sheetsUrl = localStorage.getItem('retro_sheets') || '';
+                this.currentTheme = localStorage.getItem('retro_theme') || 'theme-space1999';
 
+                // Pas thema toe
+                this.setTheme(this.currentTheme, false);
+                document.getElementById('theme-switcher').value = this.currentTheme;
+                document.getElementById('login-theme-select').value = this.currentTheme;
                 document.getElementById('sheets-url-input').value = this.sheetsUrl;
                 document.getElementById('login-toggle-check').checked = this.loginEnabled;
 
                 if (!this.loginEnabled) {
                     document.getElementById('lock-screen').style.display = 'none';
                     document.getElementById('desktop').style.display = 'block';
-                    SoundFX.startup();
+                    SoundFX.startup(this.currentTheme);
                 }
 
                 setInterval(() => {
@@ -198,19 +236,29 @@
                 }, 1000);
             }
 
+            setTheme(themeClass, playSound=true) {
+                this.currentTheme = themeClass;
+                document.body.className = themeClass;
+                localStorage.setItem('retro_theme', themeClass);
+                document.getElementById('tray-theme-label').innerText = themeClass === 'theme-terminal' ? 'CRT GREEN' : 'ALPHA 1999';
+                if(playSound) SoundFX.click();
+            }
+
             login() {
-                SoundFX.play(1500, 0.15);
+                let selectedTheme = document.getElementById('login-theme-select').value;
+                this.setTheme(selectedTheme, false);
+                SoundFX.play(1400, 0.15);
                 document.getElementById('lock-screen').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('lock-screen').style.display = 'none';
                     document.getElementById('desktop').style.display = 'block';
-                    SoundFX.startup();
+                    SoundFX.startup(this.currentTheme);
                 }, 400);
             }
 
             toggleLogin(enabled) {
                 this.loginEnabled = enabled;
-                localStorage.setItem('alpha_login', enabled);
+                localStorage.setItem('retro_login', enabled);
                 if(!enabled) this.login();
             }
 
@@ -226,14 +274,14 @@
 
             saveSettings() {
                 this.sheetsUrl = document.getElementById('sheets-url-input').value;
-                localStorage.setItem('alpha_sheets', this.sheetsUrl);
+                localStorage.setItem('retro_sheets', this.sheetsUrl);
                 SoundFX.click();
                 this.openSettings();
             }
 
             async saveData(key, value) {
                 if(!this.sheetsUrl) {
-                    alert("ERROR: No Google Sheets Webhook configured in system settings.");
+                    alert("ERROR: No Google Sheets Webhook configured.");
                     return false;
                 }
                 try {
@@ -278,11 +326,11 @@
                     win.className = 'window';
                     win.id = winId;
                     win.innerHTML = `
-                        <div class="window-header" onmousedown="alphaOS.initDrag(event, '${winId}')">
+                        <div class="window-header" onmousedown="retroOS.initDrag(event, '${winId}')">
                             <span class="window-title">[MODULE ACTIVE]</span>
                             <div class="window-controls">
-                                <button onclick="alphaOS.minimizeWindow('${winId}')" title="Minimize">_</button>
-                                <button onclick="alphaOS.maximizeWindow('${winId}')" title="Maximize">[]</button>
+                                <button onclick="retroOS.minimizeWindow('${winId}')" title="Minimize">_</button>
+                                <button onclick="retroOS.maximizeWindow('${winId}')" title="Maximize">[]</button>
                                 <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Terminate">X</button>
                             </div>
                         </div>
@@ -343,7 +391,7 @@
             }
         }
 
-        const alphaOS = new SpaceOS();
+        const retroOS = new RetroOS();
     </script>
 </body>
 </html>

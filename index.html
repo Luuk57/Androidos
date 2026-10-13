@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows 12 Network Edition</title>
+    <title>Windows 12 Network Edition - Cloud Storage</title>
     <style>
         :root {
             --win-bg: rgba(243, 243, 243, 0.88);
@@ -16,7 +16,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; color: var(--text-main); }
 
-        /* Achtergrond */
         #wallpaper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
@@ -44,17 +43,15 @@
             width: 100%; padding: 10px 14px; margin-bottom: 15px; background: rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 6px; text-align: center; font-size: 14px;
         }
-        .lock-box input::placeholder { color: rgba(255,255,255,0.6); }
         .lock-box button {
             width: 100%; padding: 10px; background: var(--accent); border: none;
             color: #fff; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.2s;
         }
         .lock-box button:hover { background: #0078d4; }
 
-        /* Desktop */
         #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
 
-        /* Taakbalk (Windows 11 gecentreerd stijl met systeembalk rechts) */
+        /* Taakbalk */
         .taskbar {
             position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
             height: 52px; background: var(--taskbar-bg); border: 1px solid var(--win-border);
@@ -62,8 +59,6 @@
             width: 95%; max-width: 900px; padding: 0 15px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
         }
         .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 6px; }
-        .taskbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
-
         .taskbar-btn {
             background: transparent; border: none; color: #1f1f1f; padding: 8px 12px;
             border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
@@ -76,7 +71,7 @@
         }
         .sys-tray:hover { background: rgba(0, 0, 0, 0.06); }
 
-        /* Venster Systeem */
+        /* Venster Systeem met strakke titelbalk knoppen bovenaan */
         .window {
             position: absolute; top: 80px; left: 120px; width: 600px; height: 450px;
             background: var(--win-bg); border: 1px solid var(--win-border);
@@ -85,18 +80,22 @@
             backdrop-filter: blur(30px); z-index: 10;
         }
         .window-header {
-            background: transparent; padding: 10px 14px; display: flex;
+            background: rgba(255, 255, 255, 0.6); padding: 8px 12px; display: flex;
             justify-content: space-between; align-items: center; cursor: move; user-select: none;
+            border-bottom: 1px solid var(--win-border);
         }
         .window-title { font-size: 13px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; }
-        .window-controls { display: flex; align-items: center; gap: 2px; }
-        .window-controls button {
-            background: none; border: none; width: 34px; height: 28px; cursor: pointer;
-            font-size: 12px; color: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.1s;
-        }
-        .window-controls button:hover { background: rgba(0,0,0,0.08); }
-        .window-controls .btn-close:hover { background: #e81123; color: #fff; }
         
+        /* Bovenste knoppenbalk: Minimaliseren, Maximaliseren, Uitdien (Sluiten) */
+        .window-controls { display: flex; align-items: center; gap: 4px; }
+        .window-controls button {
+            background: rgba(0,0,0,0.04); border: none; width: 32px; height: 26px; cursor: pointer;
+            font-size: 12px; color: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.15s;
+        }
+        .window-controls button:hover { background: rgba(0,0,0,0.12); }
+        /* Uitdien / Sluiten knop kleurt rood bij hover */
+        .window-controls .btn-close:hover { background: #e81123; color: #fff; }
+
         .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: rgba(255,255,255,0.4); }
 
         /* Systeeminstellingen Popup */
@@ -112,36 +111,28 @@
 </head>
 <body>
 
-    <!-- Achtergrond -->
     <div id="wallpaper"></div>
 
-    <!-- Inlogscherm -->
     <div id="lock-screen">
         <div class="lock-box">
             <div class="lock-avatar">👤</div>
             <h2 style="margin-bottom: 5px; font-size: 18px;">Administrator</h2>
-            <p style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 20px;">Windows 12 Netwerk Editie</p>
+            <p style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 20px;">Windows 12 Cloud Edition</p>
             <input type="password" id="pass-input" placeholder="Pincode of wachtwoord...">
             <button onclick="winOS.login()">Aanmelden</button>
             <button onclick="winOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.7); margin-top:15px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogscherm uitschakelen</button>
         </div>
     </div>
 
-    <!-- Desktop -->
     <div id="desktop">
-        <!-- Taakbalk -->
         <div class="taskbar">
             <div class="taskbar-left">
                 <button class="taskbar-btn" onclick="winOS.openSettings()" title="Instellingen">⚙ Instellingen</button>
                 <button class="taskbar-btn" onclick="winOS.openAppPrompt()" title="App Installeren">+ App Laden</button>
-                <button class="taskbar-btn" onclick="winOS.syncGoogleSheets()" title="Cloud Sync">☁ Sheets Sync</button>
-            </div>
-            <div class="taskbar-center">
-                <!-- Vrij te gebruiken centrale knoppen of status -->
             </div>
             <div class="taskbar-right">
                 <div class="sys-tray" onclick="winOS.openSettings()" title="Systeemstatus, Tijd en Datum">
-                    <span id="system-tray-icons">🔊 🌐</span>
+                    <span id="system-tray-icons">🔊 🌐 ☁️</span>
                     <div style="text-align: right; line-height: 1.2;">
                         <div id="system-time">00:00</div>
                         <div id="system-date" style="font-size: 10px; color: #555;">01-01-2026</div>
@@ -150,7 +141,6 @@
             </div>
         </div>
 
-        <!-- Instellingen Popup -->
         <div id="settings-panel" class="settings-popup">
             <h3 style="font-size: 14px; margin-bottom: 15px; color: #000; font-weight: 600;">Systeemvoorkeuren</h3>
             <label>
@@ -165,7 +155,6 @@
     </div>
 
     <script>
-        /* --- AUDIO GELUIDSENGINE --- */
         const SoundFX = {
             ctx: null,
             init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -185,7 +174,6 @@
             click() { this.play(800, 0.03, 'sine'); }
         };
 
-        /* --- OS LOGICA --- */
         class WindowsOS {
             constructor() {
                 this.loginEnabled = localStorage.getItem('win_login') !== 'false';
@@ -200,7 +188,6 @@
                     SoundFX.startup();
                 }
 
-                // Live tijd en datum updater
                 setInterval(() => {
                     let d = new Date();
                     document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -241,6 +228,36 @@
                 this.openSettings();
             }
 
+            async saveData(key, value) {
+                if(!this.sheetsUrl) {
+                    alert("Vul eerst je Google Sheets URL in via Instellingen.");
+                    return false;
+                }
+                try {
+                    await fetch(this.sheetsUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ action: 'save', key: key, value: value })
+                    });
+                    return true;
+                } catch(e) {
+                    alert("Fout bij opslaan in Google Sheet: " + e.message);
+                    return false;
+                }
+            }
+
+            async loadData() {
+                if(!this.sheetsUrl) return {};
+                try {
+                    let res = await fetch(this.sheetsUrl);
+                    let data = await res.json();
+                    return data;
+                } catch(e) {
+                    return {};
+                }
+            }
+
             openAppPrompt() {
                 SoundFX.click();
                 let url = prompt("Voer de URL in van het HTML-bestand van je app (bijv. GitHub raw URL):");
@@ -261,9 +278,9 @@
                         <div class="window-header" onmousedown="winOS.initDrag(event, '${winId}')">
                             <span class="window-title">📁 Externe App</span>
                             <div class="window-controls">
-                                <button onclick="winOS.minimizeWindow('${winId}')" title="Minimaliseren">&#9647;</button>
-                                <button onclick="winOS.maximizeWindow('${winId}')" title="Maximaliseren / Herstellen">&#x25A2;</button>
-                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">&#x2715;</button>
+                                <button onclick="winOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
+                                <button onclick="winOS.maximizeWindow('${winId}')" title="Maximaliseren / Herstellen">🗖</button>
+                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Uitdien / Sluiten">✕</button>
                             </div>
                         </div>
                         <div class="window-content" id="content-${winId}"></div>
@@ -271,7 +288,6 @@
                     document.getElementById('desktop').appendChild(win);
                     document.getElementById(`content-${winId}`).innerHTML = htmlContent;
 
-                    // Voer scripts in de geladen app uit indien aanwezig
                     let scripts = document.getElementById(`content-${winId}`).querySelectorAll('script');
                     scripts.forEach(s => {
                         let ns = document.createElement('script');
@@ -321,26 +337,6 @@
                 }
                 document.addEventListener('mousemove', onMouseMove);
                 document.onmouseup = () => document.removeEventListener('mousemove', onMouseMove);
-            }
-
-            async syncGoogleSheets() {
-                if(!this.sheetsUrl) {
-                    alert("Vul eerst je Google Sheets Webhook URL in via Systeeminstellingen.");
-                    this.openSettings();
-                    return;
-                }
-                SoundFX.click();
-                try {
-                    await fetch(this.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ action: 'sync', time: new Date().toISOString() })
-                    });
-                    alert("Succesvol gesynchroniseerd met Google Sheets!");
-                } catch(e) {
-                    alert("Synchronisatiefout: " + e.message);
-                }
             }
         }
 

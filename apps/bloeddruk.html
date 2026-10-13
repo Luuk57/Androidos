@@ -3,151 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dBase IV / FoxPro Network Database OS (1990)</title>
+    <title>Windows RT - Cloud Edition</title>
     <style>
         :root {
-            --db-blue: #0000aa;
-            --db-cyan: #00aaaa;
-            --db-white: #ffffff;
-            --db-yellow: #ffff55;
-            --db-grey: #aaaaaa;
-            --font-dos: 'Courier New', Courier, monospace;
+            --rt-blue: #0078d7;
+            --rt-tile-bg: rgba(0, 120, 215, 0.85);
+            --rt-dark: #1b1b1b;
+            --rt-light: #f2f2f2;
+            --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-dos); font-weight: bold; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: var(--db-blue); color: var(--db-white); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #005a9e; color: var(--rt-light); }
 
-        /* CRT Raster effect */
-        body::after {
-            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
-            z-index: 99999; background-size: 100% 4px; pointer-events: none;
+        /* Achtergrond (Windows RT stijl kleurverloop) */
+        #wallpaper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0078d7 0%, #104175 100%);
+            z-index: 0;
         }
 
+        /* Inlogscherm */
         #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #55ff55; padding: 40px; font-size: 16px;
-            z-index: 9999; display: flex; flex-direction: column; gap: 15px;
+            background: linear-gradient(135deg, #004b87, #002e53);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.4s ease;
         }
-
-        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; background: var(--db-blue); }
-
-        .db-menubar {
-            height: 25px; background: var(--db-grey); color: #000;
-            display: flex; align-items: center; padding: 0 10px; gap: 20px; font-size: 14px;
+        .lock-card {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 50px; text-align: center; width: 380px; backdrop-filter: blur(10px);
         }
-        .db-menu-item { cursor: pointer; padding: 2px 8px; }
-        .db-menu-item:hover { background: var(--db-blue); color: var(--db-white); }
-
-        .db-status-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 25px;
-            background: var(--db-cyan); color: #000; display: flex;
-            align-items: center; justify-content: space-between; padding: 0 10px; font-size: 13px;
+        .lock-avatar {
+            width: 90px; height: 90px; background: #fff; color: #0078d7; border-radius: 50%;
+            margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;
+            font-size: 38px; font-weight: bold;
         }
+        .lock-card input {
+            width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 15px; outline: none; text-align: center;
+        }
+        .lock-card input::placeholder { color: rgba(255,255,255,0.6); }
+        .lock-card button {
+            width: 100%; padding: 12px; background: var(--rt-blue); border: none;
+            color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .lock-card button:hover { background: #0063b1; }
 
+        /* Desktop & Metro Startscherm Omgeving */
+        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
+
+        /* Windows RT Startscherm Tegels (Dashboard) */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 48px);
+            padding: 40px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+        }
+        .start-header { font-size: 32px; font-weight: 300; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .tiles-grid { display: flex; gap: 15px; flex-wrap: wrap; }
+        
+        .rt-tile {
+            width: 160px; height: 160px; background: var(--rt-tile-bg); padding: 15px;
+            display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+            transition: transform 0.15s, background 0.15s; border: 2px solid transparent;
+        }
+        .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
+        .rt-tile span { font-size: 32px; }
+        .rt-tile label { font-size: 14px; font-weight: 500; cursor: pointer; }
+
+        /* Taakbalk (Windows RT Stijl onderaan) */
+        .taskbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); display: flex;
+            align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000;
+        }
+        .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 4px; }
+        .taskbar-btn {
+            background: transparent; border: none; color: #fff; padding: 8px 14px;
+            cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .taskbar-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .sys-tray { font-size: 12px; color: #ddd; padding: 6px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .sys-tray:hover { background: rgba(255,255,255,0.1); }
+
+        /* Venstersysteem */
         .window {
-            position: absolute; top: 50px; left: 80px; width: 680px; height: 460px;
-            background: var(--db-blue); border: 4px double var(--db-white);
-            box-shadow: 12px 12px 0px #000055; display: flex; flex-direction: column; z-index: 10;
+            position: absolute; top: 60px; left: 100px; width: 650px; height: 480px;
+            background: #ffffff; color: #000000; border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; resize: both; z-index: 10;
         }
         .window-header {
-            background: var(--db-cyan); color: #000; padding: 4px 10px;
-            display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none;
+            background: #f3f3f3; padding: 10px 15px; display: flex;
+            justify-content: space-between; align-items: center; cursor: move; user-select: none;
+            border-bottom: 1px solid #e1e1e1;
         }
-        .window-title { font-size: 13px; letter-spacing: 1px; }
-
+        .window-title { font-size: 13px; font-weight: 600; color: #333; }
+        .window-controls { display: flex; align-items: center; gap: 2px; }
         .window-controls button {
-            background: var(--db-grey); border: 1px solid #000; color: #000;
-            width: 24px; height: 20px; cursor: pointer; font-size: 11px; margin-left: 2px;
+            background: none; border: none; width: 36px; height: 28px; cursor: pointer;
+            font-size: 13px; color: #333; display: flex; align-items: center; justify-content: center; transition: 0.1s;
         }
-        .window-controls button:hover { background: var(--db-yellow); }
-        .window-controls .btn-close:hover { background: #ff5555; color: #fff; }
+        .window-controls button:hover { background: rgba(0,0,0,0.08); }
+        .window-controls .btn-close:hover { background: #e81123; color: #fff; }
+        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
 
-        .window-content { padding: 15px; flex-grow: 1; overflow-y: auto; color: var(--db-white); font-size: 14px; }
-
+        /* Configuratiescherm Popup */
         .settings-popup {
-            position: absolute; bottom: 35px; right: 20px; width: 400px;
-            background: var(--db-blue); border: 4px double var(--db-yellow);
-            padding: 15px; z-index: 2000; display: none; box-shadow: 8px 8px 0px #000;
+            position: absolute; bottom: 60px; right: 20px; width: 340px;
+            background: rgba(27, 27, 27, 0.95); border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px; z-index: 2000; display: none; backdrop-filter: blur(15px);
         }
-        .settings-popup input { width: 100%; padding: 5px; background: #000; border: 1px solid var(--db-cyan); color: #fff; margin-top: 5px; margin-bottom: 10px; }
+        .settings-popup label { display: block; margin-bottom: 12px; font-size: 12px; color: #ccc; }
+        .settings-popup input[type="text"] { width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-top: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
+    <div id="wallpaper"></div>
+
+    <!-- Inlogscherm -->
     <div id="lock-screen">
-        <p>dBase IV (v1.5) Network Relational Database System</p>
-        <p>(C) Copyright Borland / Ashton-Tate Corp 1985-1992. All rights reserved.</p>
-        <br>
-        <p>C:\DBASE> RUN SYSTEM.EXE</p>
-        <p style="color: var(--db-yellow);">ENTER USER ACCESS KEY TO INITIALIZE DATABASE:</p>
-        <div>
-            <span>PASSWORD: </span>
-            <input type="password" id="pass-input" style="background:#000; border:1px solid #55ff55; color:#55ff55; padding:5px; width:200px;" autofocus>
-            <button onclick="dbOS.login()" style="padding:5px 15px; background:#55ff55; color:#000; border:none; cursor:pointer; font-weight:bold;">[ENTER]</button>
+        <div class="lock-card">
+            <div class="lock-avatar">RT</div>
+            <h2 style="font-weight: 400; margin-bottom: 5px; font-size: 20px;">Windows RT</h2>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">Cloud Network User</p>
+            <input type="password" id="pass-input" placeholder="Wachtwoord invoeren..." autofocus>
+            <button onclick="rtOS.login()">Aanmelden</button>
+            <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:15px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
         </div>
-        <button onclick="dbOS.toggleLogin(false)" style="background:transparent; border:none; color:#aaaaaa; text-align:left; cursor:pointer; font-size:12px; margin-top:20px;">[ F8 ] Bypass Login Security</button>
     </div>
 
+    <!-- Desktop & Metro Startscherm -->
     <div id="desktop">
-        <div class="db-menubar">
-            <div class="db-menu-item" onclick="dbOS.openAppPrompt()">[F2] FORMULIER LADEN</div>
-            <div class="db-menu-item" onclick="dbOS.openSettings()">[F6] CONFIGURATIE</div>
-            <div class="db-menu-item" onclick="dbOS.toggleFullscreen()" style="color: yellow;">[F11] VOLLEDIG SCHERM</div>
+        <!-- Metro Startscherm (Tegels) -->
+        <div id="start-screen">
+            <div class="start-header">Start</div>
+            <div class="tiles-grid">
+                <div class="rt-tile" onclick="rtOS.openAppPrompt()">
+                    <span>➕</span>
+                    <label>App Laden (.html)</label>
+                </div>
+                <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
+                    <span>⚙️</span>
+                    <label>Instellingen</label>
+                </div>
+                <div class="rt-tile" onclick="rtOS.toggleFullscreen()" style="background: #3d9970;">
+                    <span>📺</span>
+                    <label>Volledig Scherm (F11)</label>
+                </div>
+            </div>
         </div>
 
-        <div class="db-status-bar">
-            <span>dBase OS | [F11] Fullscreen Toggle</span>
-            <span>SHEET SYNC: <span id="sync-indicator" style="color:red;">INACTIEF</span></span>
-            <span id="system-time">00:00:00</span>
+        <!-- Taakbalk Onder -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
+                <button class="taskbar-btn" onclick="rtOS.openAppPrompt()">+ App Laden</button>
+            </div>
+            <div class="taskbar-right">
+                <div class="sys-tray" onclick="rtOS.openSettings()" title="Systeemstatus">
+                    <span>🔊 🌐</span>
+                    <span id="system-time">00:00</span>
+                </div>
+            </div>
         </div>
 
+        <!-- Instellingen Popup -->
         <div id="settings-panel" class="settings-popup">
-            <h4 style="color: var(--db-yellow); margin-bottom: 10px;">SYSTEM CONFIGURATION (.INI)</h4>
-            <label style="font-size: 12px;">INLOGSCHERM ACTIEF AT BOOT:
-                <input type="checkbox" id="login-toggle-check" onchange="dbOS.toggleLoginSetting(this)">
+            <h3 style="font-size: 14px; margin-bottom: 15px; color: #fff; font-weight: 500;">Pc-instellingen</h3>
+            <label>
+                <input type="checkbox" id="login-toggle-check" onchange="rtOS.toggleLoginSetting(this)"> Inlogscherm tonen bij opstarten
             </label>
-            <label style="font-size: 12px;">GOOGLE SHEETS DATABASE WEBHOOK URL:
+            <label>
+                Google Sheets Webhook URL:
                 <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec">
             </label>
-            <button onclick="dbOS.saveSettings()" style="width:100%; padding:8px; background:var(--db-cyan); border:none; cursor:pointer; font-weight:bold;">OPSLAAN [ENTER]</button>
+            <button class="taskbar-btn" style="width:100%; justify-content:center; background:var(--rt-blue); color:#fff; margin-top:10px;" onclick="rtOS.saveSettings()">Opslaan</button>
         </div>
     </div>
 
     <script>
+        /* --- AUDIO GELUIDSENGINE --- */
         const SoundFX = {
             ctx: null,
             init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-            beep(freq=800, duration=0.08) {
+            play(freq, duration, type='sine') {
                 try {
                     this.init();
                     let osc = this.ctx.createOscillator();
                     let gain = this.ctx.createGain();
-                    osc.type = 'square'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                    osc.type = type; osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
                     osc.connect(gain); gain.connect(this.ctx.destination);
                     osc.start(); osc.stop(this.ctx.currentTime + duration);
                 } catch(e) {}
             },
-            startup() { [600, 750, 900].forEach((f, i) => setTimeout(() => this.beep(f, 0.08), i * 70)); },
-            click() { this.beep(1000, 0.03); }
+            startup() { [440, 554.37, 659.25].forEach((f, i) => setTimeout(() => this.play(f, 0.1, 'triangle'), i * 90)); },
+            click() { this.play(750, 0.02, 'sine'); }
         };
 
-        class DBaseOS {
+        class WindowsRT {
             constructor() {
-                this.loginEnabled = localStorage.getItem('db_login') !== 'false';
-                this.sheetsUrl = localStorage.getItem('db_sheets') || '';
+                this.loginEnabled = localStorage.getItem('rt_login') !== 'false';
+                this.sheetsUrl = localStorage.getItem('rt_sheets') || '';
 
                 document.getElementById('sheets-url-input').value = this.sheetsUrl;
                 document.getElementById('login-toggle-check').checked = this.loginEnabled;
 
-                if (this.sheetsUrl) {
-                    document.getElementById('sync-indicator').innerText = "ONLINE";
-                    document.getElementById('sync-indicator').style.color = "black";
-                }
-
-                // Luister naar F11 toets voor Fullscreen
+                // Luister naar F11 voor vol scherm
                 window.addEventListener('keydown', (e) => {
                     if (e.key === 'F11') {
                         e.preventDefault();
@@ -159,21 +222,19 @@
                     document.getElementById('lock-screen').style.display = 'none';
                     document.getElementById('desktop').style.display = 'block';
                     SoundFX.startup();
-                    this.requestFullscreen(); // Direct maximaal bij opstarten als login uit staat
+                    this.requestFullscreen();
                 }
 
                 setInterval(() => {
                     let d = new Date();
-                    document.getElementById('system-time').innerText = d.toLocaleTimeString();
+                    document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 }, 1000);
             }
 
             requestFullscreen() {
                 try {
                     if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(err => {
-                            console.log("Fullscreen geblokkeerd door browserbeleid tot eerste klik.");
-                        });
+                        document.documentElement.requestFullscreen().catch(() => {});
                     }
                 } catch(e) {}
             }
@@ -183,28 +244,35 @@
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
                 } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
+                    if (document.exitFullscreen) document.exitFullscreen();
                 }
             }
 
             login() {
-                SoundFX.beep(1200, 0.1);
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('desktop').style.display = 'block';
-                SoundFX.startup();
-                this.requestFullscreen(); // Direct maximaal na inloggen
+                SoundFX.play(600, 0.1);
+                document.getElementById('lock-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    document.getElementById('desktop').style.display = 'block';
+                    SoundFX.startup();
+                    this.requestFullscreen();
+                }, 400);
             }
 
             toggleLogin(enabled) {
                 this.loginEnabled = enabled;
-                localStorage.setItem('db_login', enabled);
+                localStorage.setItem('rt_login', enabled);
                 if(!enabled) this.login();
             }
 
             toggleLoginSetting(el) {
                 this.toggleLogin(el.checked);
+            }
+
+            toggleStartScreen() {
+                SoundFX.click();
+                let start = document.getElementById('start-screen');
+                start.style.display = start.style.display === 'none' ? 'flex' : 'none';
             }
 
             openSettings() {
@@ -215,18 +283,14 @@
 
             saveSettings() {
                 this.sheetsUrl = document.getElementById('sheets-url-input').value;
-                localStorage.setItem('db_sheets', this.sheetsUrl);
-                if(this.sheetsUrl) {
-                    document.getElementById('sync-indicator').innerText = "ONLINE";
-                    document.getElementById('sync-indicator').style.color = "black";
-                }
+                localStorage.setItem('rt_sheets', this.sheetsUrl);
                 SoundFX.click();
                 this.openSettings();
             }
 
             async saveData(key, value) {
                 if(!this.sheetsUrl) {
-                    alert("FOUT: Geen Google Sheets Webhook ingesteld via [F6] Configuratie.");
+                    alert("Vul eerst je Google Sheets URL in bij PC-instellingen.");
                     return false;
                 }
                 try {
@@ -236,10 +300,9 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ action: 'save', key: key, value: value })
                     });
-                    SoundFX.beep(1500, 0.1);
                     return true;
                 } catch(e) {
-                    alert("NETWERK FOUT: " + e.message);
+                    alert("Fout bij opslaan in Google Sheet: " + e.message);
                     return false;
                 }
             }
@@ -256,13 +319,16 @@
 
             openAppPrompt() {
                 SoundFX.click();
-                let url = prompt("VOER DE URL IN VAN HET FORMULIER (.HTML FILE):");
+                let url = prompt("Voer de URL in van het HTML-bestand van je app (bijv. GitHub raw URL):");
                 if(url) this.loadHTMLApp(url);
             }
 
             async loadHTMLApp(url) {
                 try {
                     SoundFX.click();
+                    // Sluit het startscherm bij openen van app
+                    document.getElementById('start-screen').style.display = 'none';
+
                     let res = await fetch(url);
                     let htmlContent = await res.text();
 
@@ -271,12 +337,12 @@
                     win.className = 'window';
                     win.id = winId;
                     win.innerHTML = `
-                        <div class="window-header" onmousedown="dbOS.initDrag(event, '${winId}')">
-                            <span class="window-title">╔═ DBASE FORMULIER INVOER ═╗</span>
+                        <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
+                            <span class="window-title">App Venster</span>
                             <div class="window-controls">
-                                <button onclick="dbOS.minimizeWindow('${winId}')" title="Minimaliseren">_</button>
-                                <button onclick="dbOS.maximizeWindow('${winId}')" title="Maximaliseren">□</button>
-                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Uitdien / Sluiten">X</button>
+                                <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
+                                <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
+                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">✕</button>
                             </div>
                         </div>
                         <div class="window-content" id="content-${winId}"></div>
@@ -291,7 +357,7 @@
                         document.body.appendChild(ns);
                     });
                 } catch(e) {
-                    alert("FOUT BIJ LADEN VAN FORMULIER: " + e.message);
+                    alert("Fout bij laden van app: " + e.message);
                 }
             }
 
@@ -309,10 +375,10 @@
                     win.dataset.prevLeft = win.style.left;
                     win.dataset.prevWidth = win.style.width;
                     win.dataset.prevHeight = win.style.height;
-                    win.style.top = '30px';
-                    win.style.left = '5px';
-                    win.style.width = 'calc(100vw - 10px)';
-                    win.style.height = 'calc(100vh - 65px)';
+                    win.style.top = '10px';
+                    win.style.left = '10px';
+                    win.style.width = 'calc(100vw - 20px)';
+                    win.style.height = 'calc(100vh - 70px)';
                     win.dataset.maximized = 'true';
                 }
             }
@@ -336,7 +402,7 @@
             }
         }
 
-        const dbOS = new DBaseOS();
+        const rtOS = new WindowsRT();
     </script>
 </body>
 </html>

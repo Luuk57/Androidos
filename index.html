@@ -39,7 +39,6 @@
             transition: transform 0.15s, background 0.15s; border: 2px solid transparent; position: relative;
         }
         .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
-        .rt-tile-wide { width: 355px; }
         .rt-tile .tile-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
         .rt-tile .tile-content { font-size: 18px; font-weight: bold; margin: auto 0; }
         .rt-tile .tile-sub { font-size: 11px; opacity: 0.7; }
@@ -105,13 +104,6 @@
             </div>
             
             <div class="tiles-grid" id="tiles-container">
-                <!-- Standaard Bloeddruk Tegel -->
-                <div class="rt-tile rt-tile-wide" id="tile-bloeddruk" onclick="rtOS.openApp('apps/bloeddruk-tegel.html', 'Bloeddruk & HR')" style="background: #0078d7;">
-                    <div class="tile-title">🫀 Bloeddruk & HR (Live Tegel)</div>
-                    <div class="tile-content" id="live-bp-display">-- / --</div>
-                    <div class="tile-sub" id="live-hr-display">Klik om te openen / in te vullen</div>
-                </div>
-
                 <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
                     <div class="tile-title">⚙️ Instellingen</div>
                     <div class="tile-content" style="font-size: 32px; text-align: center;">⚙️</div>
@@ -181,7 +173,6 @@
                     if (e.key === 'F11') { e.preventDefault(); this.toggleFullscreen(); }
                 });
 
-                // Direct opstarten & audio afspelen
                 SoundFX.startup();
                 this.requestFullscreen();
 
@@ -191,7 +182,6 @@
                 }, 1000);
 
                 this.renderCustomTiles();
-                this.updateLiveTiles();
             }
 
             requestFullscreen() {
@@ -263,21 +253,6 @@
                 });
             }
 
-            async updateLiveTiles() {
-                let data = await this.loadData();
-                if (data['laatste_bloeddruk_hr']) {
-                    try {
-                        let rec = JSON.parse(data['laatste_bloeddruk_hr']);
-                        let displayBp = document.getElementById('live-bp-display');
-                        let displayHr = document.getElementById('live-hr-display');
-                        if (displayBp && displayHr) {
-                            displayBp.innerText = `${rec.sys} / ${rec.dia} mmHg`;
-                            displayHr.innerText = `HR: ${rec.hr} BPM (${rec.time || 'recent'})`;
-                        }
-                    } catch(e) {}
-                }
-            }
-
             async saveData(key, value) {
                 if(!this.sheetsUrl) {
                     alert("Vul eerst je Google Sheets URL in bij PC-instellingen.");
@@ -290,7 +265,6 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ action: 'save', key: key, value: value })
                     });
-                    this.updateLiveTiles();
                     return true;
                 } catch(e) {
                     alert("Fout bij opslaan in Google Sheet: " + e.message);

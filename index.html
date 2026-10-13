@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows RT - Live Tiles Edition</title>
+    <title>Windows RT - Direct Access Edition</title>
     <style>
         :root {
             --rt-blue: #0078d7;
@@ -22,32 +22,7 @@
             z-index: 0;
         }
 
-        /* Inlogscherm */
-        #lock-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #004b87, #002e53);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; transition: opacity 0.3s ease;
-        }
-        .lock-card {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px; text-align: center; width: 360px; backdrop-filter: blur(10px);
-        }
-        .lock-avatar {
-            width: 80px; height: 80px; background: #fff; color: #0078d7; border-radius: 50%;
-            margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;
-            font-size: 36px; font-weight: bold;
-        }
-        .lock-card input {
-            width: 100%; padding: 10px; margin-bottom: 12px; background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 14px; text-align: center; outline: none;
-        }
-        .lock-card button {
-            width: 100%; padding: 10px; background: var(--rt-blue); border: none;
-            color: #fff; font-weight: 600; cursor: pointer; font-size: 14px;
-        }
-
-        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
+        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: block; }
 
         /* Metro Startscherm & Tegel Grid */
         #start-screen {
@@ -118,18 +93,6 @@
 
     <div id="wallpaper"></div>
 
-    <!-- Inlogscherm -->
-    <div id="lock-screen">
-        <div class="lock-card">
-            <div class="lock-avatar">RT</div>
-            <h2 style="font-weight: 400; margin-bottom: 5px; font-size: 20px;">Windows RT</h2>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 20px;">Live Tiles Edition</p>
-            <input type="password" id="pass-input" placeholder="Wachtwoord invoeren..." autofocus>
-            <button onclick="rtOS.login()">Aanmelden</button>
-            <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:12px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
-        </div>
-    </div>
-
     <!-- Desktop -->
     <div id="desktop">
         <!-- Startscherm met Tegels -->
@@ -146,7 +109,7 @@
                 <div class="rt-tile rt-tile-wide" id="tile-bloeddruk" onclick="rtOS.openApp('apps/bloeddruk-tegel.html', 'Bloeddruk & HR')" style="background: #0078d7;">
                     <div class="tile-title">🫀 Bloeddruk & HR (Live Tegel)</div>
                     <div class="tile-content" id="live-bp-display">-- / --</div>
-                    <div class="tile-sub" id="live-hr-display">Klik om te openen / in te vulling</div>
+                    <div class="tile-sub" id="live-hr-display">Klik om te openen / in te vullen</div>
                 </div>
 
                 <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
@@ -179,9 +142,6 @@
         <div id="settings-panel" class="settings-popup">
             <h3 style="font-size: 14px; margin-bottom: 15px; color: #fff; font-weight: 500;">Pc-instellingen</h3>
             <label>
-                <input type="checkbox" id="login-toggle-check" onchange="rtOS.toggleLoginSetting(this)"> Inlogscherm tonen bij opstarten
-            </label>
-            <label>
                 Google Sheets Webhook URL:
                 <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec">
             </label>
@@ -212,20 +172,18 @@
 
         class WindowsRT {
             constructor() {
-                this.loginEnabled = localStorage.getItem('rt_login') !== 'false';
                 this.sheetsUrl = localStorage.getItem('rt_sheets') || '';
                 this.customTiles = JSON.parse(localStorage.getItem('rt_tiles') || '[]');
 
                 document.getElementById('sheets-url-input').value = this.sheetsUrl;
-                document.getElementById('login-toggle-check').checked = this.loginEnabled;
 
                 window.addEventListener('keydown', (e) => {
                     if (e.key === 'F11') { e.preventDefault(); this.toggleFullscreen(); }
                 });
 
-                if (!this.loginEnabled) {
-                    this.hideLockScreen();
-                }
+                // Direct opstarten & audio afspelen
+                SoundFX.startup();
+                this.requestFullscreen();
 
                 setInterval(() => {
                     let d = new Date();
@@ -234,15 +192,6 @@
 
                 this.renderCustomTiles();
                 this.updateLiveTiles();
-            }
-
-            hideLockScreen() {
-                let lock = document.getElementById('lock-screen');
-                lock.style.opacity = '0';
-                setTimeout(() => {
-                    lock.style.display = 'none';
-                    document.getElementById('desktop').style.display = 'block';
-                }, 300);
             }
 
             requestFullscreen() {
@@ -254,21 +203,6 @@
                 if (!document.fullscreenElement) document.documentElement.requestFullscreen();
                 else if (document.exitFullscreen) document.exitFullscreen();
             }
-
-            login() {
-                SoundFX.play(600, 0.1);
-                this.hideLockScreen();
-                SoundFX.startup();
-                this.requestFullscreen();
-            }
-
-            toggleLogin(enabled) {
-                this.loginEnabled = enabled;
-                localStorage.setItem('rt_login', enabled);
-                if(!enabled) this.login();
-            }
-
-            toggleLoginSetting(el) { this.toggleLogin(el.checked); }
 
             toggleStartScreen() {
                 SoundFX.click();
@@ -377,7 +311,6 @@
             async openApp(url, title="App") {
                 try {
                     SoundFX.click();
-                    // Sluit het startscherm netjes af bij het openen van een app
                     document.getElementById('start-screen').style.display = 'none';
 
                     let res = await fetch(url);

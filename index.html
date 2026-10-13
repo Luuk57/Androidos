@@ -3,137 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Windows 10/11 Cyber-Net Edition</title>
+<title>Windows Network Edition</title>
 <style>
 :root {
---win-blue: #0078d4;
---win-dark: #1e1e1e;
---win-taskbar: rgba(30, 30, 30, 0.85);
---win-border: rgba(255, 255, 255, 0.15);
---cyber-glow: #00ffcc;
---text-light: #f3f3f3;
+--win-blue: #0067c0;
+--win-blue-hover: #005a9e;
+--win-dark: #202020;
+--win-taskbar: rgba(243, 243, 243, 0.85);
+--win-border: rgba(0, 0, 0, 0.15);
+--text-main: #1f1f1f;
+--desktop-bg: #0078d7;
 }
 ​* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-body, html { width: 100%; height: 100%; overflow: hidden; background: #000; color: var(--text-light); }
-​/* Cyberpunk Windows Achtergrond */
+body, html { width: 100%; height: 100%; overflow: hidden; background: var(--desktop-bg); color: var(--text-main); }
+​/* Standaard Windows Wallpaper (Blauw tinten) */
 #desktop-bg {
 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-background-size: cover; z-index: 0;
+background: linear-gradient(135deg, #005a9e, #0078d7, #1f4e78);
+z-index: 0;
 }
-#net-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.4; pointer-events: none; }
-​/* Inlogscherm (Windows Style) */
+​/* Inlogscherm (Normale Windows Stijl) */
 #login-screen {
 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
-background-size: cover; backdrop-filter: blur(25px);
+background: linear-gradient(135deg, #1f4e78, #005a9e);
 display: flex; flex-direction: column; align-items: center; justify-content: center;
-z-index: 9999; transition: opacity 0.5s ease;
+z-index: 9999; transition: opacity 0.4s ease;
 }
 .login-card {
-background: rgba(20, 20, 20, 0.65); border: 1px solid var(--win-border);
+background: rgba(255, 255, 255, 0.95); border: 1px solid var(--win-border);
 padding: 40px; border-radius: 8px; text-align: center; width: 340px;
-box-shadow: 0 15px 35px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: #000;
 }
 .user-avatar {
-width: 90px; height: 90px; border-radius: 50%; background: var(--win-blue);
+width: 80px; height: 80px; border-radius: 50%; background: #0078d7;
 margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;
-font-size: 36px; border: 2px solid var(--cyber-glow); box-shadow: 0 0 15px rgba(0,255,204,0.3);
+font-size: 32px; color: #fff;
 }
 .login-card input {
-width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5);
-border: 1px solid var(--win-border); color: #fff; border-radius: 4px;
+width: 100%; padding: 10px 12px; background: #fff;
+border: 1px solid #8a8a8a; color: #000; border-radius: 3px;
 margin-bottom: 15px; outline: none; font-size: 14px;
 }
-.login-card input:focus { border-color: var(--win-blue); box-shadow: 0 0 5px rgba(0,120,212,0.5); }
+.login-card input:focus { border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,103,192,0.2); }
 .login-card button {
 width: 100%; padding: 10px; background: var(--win-blue); border: none;
-color: white; font-weight: 600; border-radius: 4px; cursor: pointer; transition: 0.2s;
+color: white; font-weight: 600; border-radius: 3px; cursor: pointer; transition: 0.15s;
 }
-.login-card button:hover { background: #106ebe; }
+.login-card button:hover { background: var(--win-blue-hover); }
 ​/* Desktop Omgeving */
 #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
-​/* Windows Taakbalk */
+​/* Windows Taakbalk (Onderaan, Gecentreerd/Standaard) */
 .taskbar {
 position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
 background: var(--win-taskbar); backdrop-filter: blur(20px);
 border-top: 1px solid var(--win-border); display: flex; align-items: center;
-justify-content: space-between; padding: 0 10px; z-index: 10000;
+justify-content: space-between; padding: 0 8px; z-index: 10000;
 }
-.taskbar-left, .taskbar-right { display: flex; gap: 6px; align-items: center; height: 100%; }
+.taskbar-left, .taskbar-right { display: flex; gap: 4px; align-items: center; height: 100%; }
 ​.tb-btn {
-background: transparent; border: none; color: #fff; padding: 0 12px;
+background: transparent; border: none; color: #1f1f1f; padding: 0 12px;
 height: 80%; border-radius: 4px; cursor: pointer; display: flex; align-items: center;
 gap: 8px; font-size: 13px; transition: background 0.15s;
 }
-.tb-btn:hover { background: rgba(255,255,255,0.1); }
-.tb-btn.active { background: rgba(255,255,255,0.15); border-bottom: 2px solid var(--win-blue); }
-​/* Start Menu */
+.tb-btn:hover { background: rgba(0,0,0,0.06); }
+.tb-btn.active { background: rgba(0,0,0,0.1); border-bottom: 2px solid var(--win-blue); }
+​/* Windows Start Menu */
 #start-menu {
-position: absolute; bottom: 56px; left: 10px; width: 360px; height: 480px;
-background: rgba(32, 32, 32, 0.85); backdrop-filter: blur(30px);
-border: 1px solid var(--win-border); border-radius: 8px; padding: 20px;
+position: absolute; bottom: 56px; left: 8px; width: 380px; height: 460px;
+background: rgba(248, 248, 248, 0.95); backdrop-filter: blur(25px);
+border: 1px solid var(--win-border); border-radius: 8px; padding: 24px;
 display: none; flex-direction: column; z-index: 10001;
-box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #000;
 }
-#start-menu h4 { font-size: 14px; margin-bottom: 15px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-.start-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+#start-menu h4 { font-size: 13px; margin-bottom: 15px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.start-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .start-tile {
-background: rgba(255,255,255,0.05); border: 1px solid var(--win-border);
-border-radius: 6px; padding: 15px 10px; text-align: center; cursor: pointer;
-transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+background: #fff; border: 1px solid var(--win-border);
+border-radius: 6px; padding: 16px 10px; text-align: center; cursor: pointer;
+transition: 0.15s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.03);
 }
-.start-tile:hover { background: rgba(255,255,255,0.12); border-color: var(--win-blue); }
-.start-tile span { font-size: 11px; }
-​/* Venster Systeem */
+.start-tile:hover { background: #f0f0f0; border-color: #adadad; }
+.start-tile span { font-size: 12px; color: #333; }
+​/* Venster Systeem (Windows Stijl) */
 .window {
-position: absolute; top: 80px; left: 120px; width: 600px; height: 450px;
-background: rgba(24, 24, 24, 0.92); border: 1px solid var(--win-border);
-border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+position: absolute; top: 70px; left: 100px; width: 640px; height: 480px;
+background: #fdfdfd; border: 1px solid #b2b2b2;
+border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 display: flex; flex-direction: column; overflow: hidden; resize: both;
-backdrop-filter: blur(15px); z-index: 100;
+z-index: 100;
 }
 .window-header {
-background: rgba(30, 30, 30, 0.95); height: 36px; padding: 0 12px;
+background: #f3f3f3; height: 36px; padding: 0 12px;
 display: flex; justify-content: space-between; align-items: center;
-border-bottom: 1px solid var(--win-border); cursor: move;
+border-bottom: 1px solid #e1e1e1; cursor: move;
 }
-.window-title { font-size: 12px; color: #ddd; display: flex; align-items: center; gap: 8px; }
+.window-title { font-size: 12px; color: #333; display: flex; align-items: center; gap: 8px; font-weight: 500; }
 .window-controls { display: flex; height: 100%; }
 .win-ctrl-btn {
-background: none; border: none; color: #fff; width: 45px; height: 100%;
-cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.1s;
+background: none; border: none; color: #1f1f1f; width: 45px; height: 100%;
+cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: 0.1s;
 }
-.win-ctrl-btn:hover { background: rgba(255,255,255,0.1); }
-.win-ctrl-btn.close:hover { background: #e81123; }
-.window-body { padding: 20px; flex-grow: 1; overflow-y: auto; background: rgba(18, 18, 18, 0.85); }
-​/* Instellingen & App Loader Panels */
+.win-ctrl-btn:hover { background: rgba(0,0,0,0.08); }
+.win-ctrl-btn.close:hover { background: #e81123; color: #fff; }
+.window-body { padding: 20px; flex-grow: 1; overflow-y: auto; background: #ffffff; color: #000; }
+​/* Zwevende Panelen (Instellingen / App Loader) */
 .floating-panel {
-position: absolute; bottom: 56px; right: 10px; width: 320px;
-background: rgba(30, 30, 30, 0.9); border: 1px solid var(--win-border);
+position: absolute; bottom: 56px; right: 8px; width: 320px;
+background: #f8f8f8; border: 1px solid var(--win-border);
 border-radius: 8px; padding: 20px; z-index: 10001; display: none;
-backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #000;
 }
-.floating-panel h3 { font-size: 15px; margin-bottom: 15px; color: var(--win-blue); border-bottom: 1px solid var(--win-border); padding-bottom: 8px; }
-.floating-panel label { display: block; margin-bottom: 12px; font-size: 12px; color: #ccc; }
-.floating-panel input[type="text"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.4); border: 1px solid var(--win-border); color: #fff; border-radius: 4px; margin-top: 5px; margin-bottom: 10px; outline: none; }
-.win-btn { width: 100%; padding: 8px; background: var(--win-blue); border: none; color: #fff; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; }
-.win-btn:hover { background: #106ebe; }
+.floating-panel h3 { font-size: 14px; margin-bottom: 14px; color: var(--win-blue); border-bottom: 1px solid #e1e1e1; padding-bottom: 8px; }
+.floating-panel label { display: block; margin-bottom: 12px; font-size: 12px; color: #333; }
+.floating-panel input[type="text"] { width: 100%; padding: 8px; background: #fff; border: 1px solid #adadad; color: #000; border-radius: 3px; margin-top: 5px; margin-bottom: 10px; outline: none; }
+.win-btn { width: 100%; padding: 8px; background: var(--win-blue); border: none; color: #fff; border-radius: 3px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.15s; }
+.win-btn:hover { background: var(--win-blue-hover); }
 </style>
 </head>
 <body>
-​<!-- Achtergrond & Canvas -->
+​<!-- Bureau-achtergrond -->
 <div id="desktop-bg"></div>
-<canvas id="net-canvas"></canvas>
-​<!-- Inlogscherm (Windows Editie) -->
+​<!-- Windows Inlogscherm -->
 <div id="login-screen">
 <div class="login-card">
 <div class="user-avatar">👤</div>
-<h2 style="font-size: 20px; font-weight: 400; margin-bottom: 5px;">Netwerk Beheerder</h2>
-<p style="font-size: 11px; color: #888; margin-bottom: 20px;">Cyber-WinNode v11.4</p>
+<h2 style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">Netwerkbeheerder</h2>
+<p style="font-size: 12px; color: #666; margin-bottom: 20px;">Windows Network Edition</p>
 <input type="password" id="login-pass" placeholder="PIN of Wachtwoord">
 <button onclick="WinOS.login()">Aanmelden</button>
-<button onclick="WinOS.toggleLoginGate(false)" style="background:transparent; border:none; color:#777; margin-top:15px; font-size:11px; cursor:pointer;">Inlogscherm Uitschakelen</button>
+<button onclick="WinOS.toggleLoginGate(false)" style="background:transparent; border:none; color:#0067c0; margin-top:15px; font-size:12px; cursor:pointer;">Inlogscherm uitschakelen</button>
 </div>
 </div>
 ​<!-- Desktop Omgeving -->
@@ -141,32 +140,32 @@ backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 <!-- Taakbalk -->
 <div class="taskbar">
 <div class="taskbar-left">
-<button class="tb-btn" onclick="WinOS.toggleStartMenu()">🪟 Start</button>
-<button class="tb-btn" onclick="WinOS.togglePanel('app-loader-panel')">📦 App Laden (.html)</button>
+<button class="tb-btn" onclick="WinOS.toggleStartMenu()">⊞ Start</button>
+<button class="tb-btn" onclick="WinOS.togglePanel('app-loader-panel')">📂 App Installeren (.html)</button>
 <button class="tb-btn" onclick="WinOS.togglePanel('settings-panel')">⚙ Instellingen</button>
 <button class="tb-btn" onclick="WinOS.syncSheets()">☁ Cloud Sync</button>
 </div>
 <div class="taskbar-right">
-<span id="taskbar-clock" style="font-size: 12px; padding: 0 10px; color: #ddd;">00:00</span>
+<span id="taskbar-clock" style="font-size: 12px; padding: 0 10px; color: #1f1f1f;">00:00</span>
 </div>
 </div>
 ​<!-- Start Menu -->
 <div id="start-menu">
-<h4>Vastgemaakte Apps</h4>
+<h4>Vastgemaakte Netwerk Apps</h4>
 <div class="start-grid">
-<div class="start-tile" onclick="WinOS.openAppModalFromPreset('https://raw.githubusercontent.com/username/repo/main/apps/terminal.html')">
-<span style="font-size:22px;">💻</span>
-<span>Terminal</span>
+<div class="start-tile" onclick="WinOS.openAppModalFromPreset('https://raw.githubusercontent.com/username/repo/main/apps/net-status.html')">
+<span style="font-size:20px;">📊</span>
+<span>Netwerk Monitor</span>
 </div>
 <div class="start-tile" onclick="WinOS.togglePanel('app-loader-panel'); WinOS.toggleStartMenu();">
-<span style="font-size:22px;">🌐</span>
-<span>URL App</span>
+<span style="font-size:20px;">🌐</span>
+<span>App Lader</span>
 </div>
 </div>
 </div>
 ​<!-- App Loader Paneel -->
 <div id="app-loader-panel" class="floating-panel">
-<h3>GitHub HTML App Laden</h3>
+<h3>App Installeren via GitHub</h3>
 <label>GitHub Raw URL (.html):
 <input type="text" id="github-app-url" placeholder="https://raw.githubusercontent.com/.../app.html">
 </label>
@@ -176,7 +175,7 @@ backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 <div id="settings-panel" class="floating-panel">
 <h3>Systeeminstellingen</h3>
 <label>
-<input type="checkbox" id="setting-login-toggle" onchange="WinOS.updateLoginSetting(this)"> Inlogscherm Actief bij Opstarten
+<input type="checkbox" id="setting-login-toggle" onchange="WinOS.updateLoginSetting(this)"> Inlogscherm actief bij opstarten
 </label>
 <label>Google Sheets Webhook URL:
 <input type="text" id="settings-sheets-url" placeholder="https://script.google.com/macros/s/.../exec">
@@ -195,45 +194,18 @@ try {
 let osc = this.ctx.createOscillator();
 let gain = this.ctx.createGain();
 osc.type = type; osc.frequency.value = freq;
-gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
 gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
 osc.connect(gain); gain.connect(this.ctx.destination);
 osc.start(); osc.stop(this.ctx.currentTime + duration);
 } catch(e){}
 },
-click() { this.playTone(800, 0.03, 'sine'); },
+click() { this.playTone(600, 0.02, 'sine'); },
 startup() {
 this.init();
-[300, 450, 600, 900].forEach((f, i) => setTimeout(() => this.playTone(f, 0.15, 'triangle'), i * 110));
+[400, 550, 750].forEach((f, i) => setTimeout(() => this.playTone(f, 0.1, 'sine'), i * 100));
 }
 };
-​/* --- NETWERK ACHTERGROND ANIMATIE --- */
-const canvas = document.getElementById('net-canvas');
-const ctx = canvas.getContext('2d');
-let points = [];
-function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-​for(let i=0; i<40; i++) points.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3});
-​function renderNet() {
-ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle = 'rgba(0,255,204,0.5)';
-ctx.strokeStyle = 'rgba(0,120,212,0.15)';
-points.forEach((p, idx) => {
-p.x += p.vx; p.y += p.vy;
-if(p.x<0||p.x>canvas.width) p.vx*=-1;
-if(p.y<0||p.y>canvas.height) p.vy*=-1;
-ctx.fillRect(p.x,p.y,2,2);
-for(let j=idx+1; j<points.length; j++) {
-let p2 = points[j];
-if(Math.hypot(p.x-p2.x, p.y-p2.y) < 140) {
-ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
-}
-}
-});
-requestAnimationFrame(renderNet);
-}
-renderNet();
 ​/* --- WINDOWS NETOS KERN --- */
 class WindowsNetOS {
 constructor() {
@@ -257,7 +229,7 @@ setTimeout(() => {
 document.getElementById('login-screen').style.display = 'none';
 document.getElementById('desktop').style.display = 'block';
 SoundFX.startup();
-}, 500);
+}, 400);
 }
 ​toggleLoginGate(active) {
 this.loginEnabled = active;
@@ -303,11 +275,11 @@ let html = await res.text();
 let win = document.createElement('div');
 win.className = 'window';
 win.id = winId;
-win.innerHTML = <div class="window-header" onmousedown="WinOS.initDrag(event, '${winId}')"> <span class="window-title">🪟 Externe App Venster</span> <div class="window-controls"> <button class="win-ctrl-btn" onclick="SoundFX.click(); document.getElementById('${winId}').style.display='none'">🗕</button> <button class="win-ctrl-btn" onclick="SoundFX.click(); WinOS.maximizeWin('${winId}')">🗖</button> <button class="win-ctrl-btn close" onclick="SoundFX.click(); document.getElementById('${winId}').remove()">✕</button> </div> </div> <div class="window-body" id="body-${winId}"></div>;
+win.innerHTML = <div class="window-header" onmousedown="WinOS.initDrag(event, '${winId}')"> <span class="window-title">🗔 Netwerk Toepassing</span> <div class="window-controls"> <button class="win-ctrl-btn" onclick="SoundFX.click(); document.getElementById('${winId}').style.display='none'">🗕</button> <button class="win-ctrl-btn" onclick="SoundFX.click(); WinOS.maximizeWin('${winId}')">🗖</button> <button class="win-ctrl-btn close" onclick="SoundFX.click(); document.getElementById('${winId}').remove()">✕</button> </div> </div> <div class="window-body" id="body-${winId}"></div>;
 document.getElementById('desktop').appendChild(win);
 ​let body = document.getElementById(body-${winId});
 body.innerHTML = html;
-​// Uitvoeren van eventuele scripts binnen de geladen HTML
+​// Uitvoeren van scripts in de geladen HTML app
 body.querySelectorAll('script').forEach(old => {
 let s = document.createElement('script');
 Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
@@ -316,7 +288,7 @@ old.parentNode.replaceChild(s, old);
 });
 ​this.closePanels();
 } catch(e) {
-alert("Kan app niet laden via GitHub URL: " + e.message);
+alert("Kan app niet laden via URL: " + e.message);
 }
 }
 ​openAppModalFromPreset(url) {
@@ -326,7 +298,7 @@ this.loadExternalApp(url);
 ​maximizeWin(id) {
 let w = document.getElementById(id);
 if(w.dataset.max === 'true') {
-w.style.top = '80px'; w.style.left = '120px'; w.style.width = '600px'; w.style.height = '450px';
+w.style.top = '70px'; w.style.left = '100px'; w.style.width = '640px'; w.style.height = '480px';
 w.dataset.max = 'false';
 } else {
 w.style.top = '0px'; w.style.left = '0px'; w.style.width = '100vw'; w.style.height = 'calc(100vh - 48px)';
@@ -355,9 +327,9 @@ try {
 await fetch(this.sheetsUrl, {
 method: 'POST', mode: 'no-cors',
 headers: {'Content-Type': 'application/json'},
-body: JSON.stringify({ device: 'Windows-Cyber-Node', time: new Date().toISOString(), status: 'online' })
+body: JSON.stringify({ device: 'Windows-Standard-Node', time: new Date().toISOString(), status: 'online' })
 });
-alert("Windows Netwerkstatus succesvol gesynchroniseerd met Google Spreadsheet!");
+alert("Netwerkstatus succesvol gesynchroniseerd met Google Spreadsheet!");
 } catch(e) {
 alert("Sync mislukt: " + e.message);
 }

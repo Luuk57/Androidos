@@ -6,17 +6,17 @@
     <title>Windows 12 Network Edition</title>
     <style>
         :root {
-            --win-bg: rgba(243, 243, 243, 0.85);
+            --win-bg: rgba(243, 243, 243, 0.88);
             --win-border: rgba(200, 200, 200, 0.4);
             --accent: #0067c0;
             --text-main: #1f1f1f;
-            --taskbar-bg: rgba(255, 255, 255, 0.75);
+            --taskbar-bg: rgba(255, 255, 255, 0.80);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; color: var(--text-main); }
 
-        /* Achtergrond (Windows 11/12 abstract style) */
+        /* Achtergrond */
         #wallpaper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
@@ -54,20 +54,27 @@
         /* Desktop */
         #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
 
-        /* Taakbalk (Windows 11 gecentreerd stijl) */
+        /* Taakbalk (Windows 11 gecentreerd stijl met systeembalk rechts) */
         .taskbar {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
             height: 52px; background: var(--taskbar-bg); border: 1px solid var(--win-border);
-            backdrop-filter: blur(20px); display: flex; align-items: center; gap: 8px;
-            padding: 0 15px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
+            backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between;
+            width: 95%; max-width: 900px; padding: 0 15px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
         }
+        .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 6px; }
+        .taskbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
+
         .taskbar-btn {
             background: transparent; border: none; color: #1f1f1f; padding: 8px 12px;
             border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
             display: flex; align-items: center; gap: 6px; transition: 0.2s;
         }
         .taskbar-btn:hover { background: rgba(0, 0, 0, 0.06); }
-        .taskbar-divider { width: 1px; height: 24px; background: rgba(0,0,0,0.15); margin: 0 4px; }
+        .sys-tray {
+            font-size: 12px; font-weight: 500; color: #1f1f1f; padding: 6px 10px; border-radius: 6px;
+            cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s;
+        }
+        .sys-tray:hover { background: rgba(0, 0, 0, 0.06); }
 
         /* Venster Systeem */
         .window {
@@ -88,15 +95,14 @@
             font-size: 12px; color: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.1s;
         }
         .window-controls button:hover { background: rgba(0,0,0,0.08); }
-        /* Kruisje knop specifiek rood bij hover */
         .window-controls .btn-close:hover { background: #e81123; color: #fff; }
         
         .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: rgba(255,255,255,0.4); }
 
         /* Systeeminstellingen Popup */
         .settings-popup {
-            position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%);
-            width: 320px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--win-border);
+            position: absolute; bottom: 75px; right: 20px; width: 320px;
+            background: rgba(255, 255, 255, 0.92); border: 1px solid var(--win-border);
             padding: 20px; border-radius: 14px; z-index: 2000; display: none;
             backdrop-filter: blur(25px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
@@ -125,11 +131,23 @@
     <div id="desktop">
         <!-- Taakbalk -->
         <div class="taskbar">
-            <button class="taskbar-btn" onclick="winOS.openSettings()" title="Instellingen">⚙ Instellingen</button>
-            <button class="taskbar-btn" onclick="winOS.openAppPrompt()" title="App Installeren">+ App Laden</button>
-            <button class="taskbar-btn" onclick="winOS.syncGoogleSheets()" title="Cloud Sync">☁ Sheets Sync</button>
-            <div class="taskbar-divider"></div>
-            <span id="system-clock" style="font-size: 12px; font-weight: 500; padding: 0 6px; color: #1f1f1f;">00:00</span>
+            <div class="taskbar-left">
+                <button class="taskbar-btn" onclick="winOS.openSettings()" title="Instellingen">⚙ Instellingen</button>
+                <button class="taskbar-btn" onclick="winOS.openAppPrompt()" title="App Installeren">+ App Laden</button>
+                <button class="taskbar-btn" onclick="winOS.syncGoogleSheets()" title="Cloud Sync">☁ Sheets Sync</button>
+            </div>
+            <div class="taskbar-center">
+                <!-- Vrij te gebruiken centrale knoppen of status -->
+            </div>
+            <div class="taskbar-right">
+                <div class="sys-tray" onclick="winOS.openSettings()" title="Systeemstatus, Tijd en Datum">
+                    <span id="system-tray-icons">🔊 🌐</span>
+                    <div style="text-align: right; line-height: 1.2;">
+                        <div id="system-time">00:00</div>
+                        <div id="system-date" style="font-size: 10px; color: #555;">01-01-2026</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Instellingen Popup -->
@@ -182,9 +200,11 @@
                     SoundFX.startup();
                 }
 
+                // Live tijd en datum updater
                 setInterval(() => {
                     let d = new Date();
-                    document.getElementById('system-clock').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('system-date').innerText = d.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'});
                 }, 1000);
             }
 
@@ -242,7 +262,7 @@
                             <span class="window-title">📁 Externe App</span>
                             <div class="window-controls">
                                 <button onclick="winOS.minimizeWindow('${winId}')" title="Minimaliseren">&#9647;</button>
-                                <button onclick="winOS.maximizeWindow('${winId}')" title="Groter knop">&#x25A2;</button>
+                                <button onclick="winOS.maximizeWindow('${winId}')" title="Maximaliseren / Herstellen">&#x25A2;</button>
                                 <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">&#x2715;</button>
                             </div>
                         </div>
@@ -277,10 +297,10 @@
                     win.dataset.prevLeft = win.style.left;
                     win.dataset.prevWidth = win.style.width;
                     win.dataset.prevHeight = win.style.height;
-                    win.style.top = '0px';
-                    win.style.left = '0px';
-                    win.style.width = '100vw';
-                    win.style.height = 'calc(100vh - 65px)';
+                    win.style.top = '10px';
+                    win.style.left = '10px';
+                    win.style.width = 'calc(100vw - 20px)';
+                    win.style.height = 'calc(100vh - 75px)';
                     win.dataset.maximized = 'true';
                 }
             }

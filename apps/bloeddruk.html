@@ -1,0 +1,144 @@
+<div style="font-family: var(--font-family, monospace); padding: 10px; color: var(--text-main, #00ff66);">
+    <h3 style="color: var(--accent, #00ff66); margin-bottom: 15px; border-bottom: 1px solid var(--accent, #00ff66); padding-bottom: 5px;">
+        BLOEDDRUK & HARTSLAG MONITOR
+    </h3>
+
+    <!-- INVOERFORMULIER -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div>
+            <label style="font-size: 11px; display: block; margin-bottom: 3px;">SYSTOLISCH (BOVENDRUK):</label>
+            <input type="number" id="sys-input" placeholder="bijv. 120" style="width: 100%; padding: 6px; background: #000; border: 1px solid var(--accent, #00ff66); color: #fff;">
+        </div>
+        <div>
+            <label style="font-size: 11px; display: block; margin-bottom: 3px;">DIASTOLISCH (ONDERDRUK):</label>
+            <input type="number" id="dia-input" placeholder="bijv. 80" style="width: 100%; padding: 6px; background: #000; border: 1px solid var(--accent, #00ff66); color: #fff;">
+        </div>
+        <div>
+            <label style="font-size: 11px; display: block; margin-bottom: 3px;">HARTSLAG (BPM):</label>
+            <input type="number" id="hr-input" placeholder="bijv. 72" style="width: 100%; padding: 6px; background: #000; border: 1px solid var(--accent, #00ff66); color: #fff;">
+        </div>
+        <div>
+            <label style="font-size: 11px; display: block; margin-bottom: 3px;">UF ADVIES (LITER):</label>
+            <input type="number" step="0.1" id="uf-input" placeholder="bijv. 3.5" style="width: 100%; padding: 6px; background: #000; border: 1px solid var(--accent, #00ff66); color: #fff;">
+        </div>
+    </div>
+
+    <!-- KNOPPEN -->
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <button onclick="analyseAndSave()" style="flex: 1; padding: 8px; background: var(--accent, #00ff66); color: #000; border: none; font-weight: bold; cursor: pointer;">
+            OPSLAAN & ANALYSEREN
+        </button>
+        <button onclick="loadBloodPressureHistory()" style="padding: 8px; background: #222; color: #fff; border: 1px solid #555; cursor: pointer;">
+            OPHALEN
+        </button>
+    </div>
+
+    <!-- STATUS & KLEURCODERING -->
+    <div id="bp-status-box" style="display: none; padding: 10px; border: 1px solid #555; background: rgba(0,0,0,0.5); font-size: 12px; margin-bottom: 15px;">
+        <div id="uf-indicator" style="padding: 5px; font-weight: bold; margin-bottom: 8px; text-align: center;"></div>
+        <div id="bp-summary"></div>
+    </div>
+
+    <!-- HISTORIE OVERZICHT -->
+    <div style="font-size: 11px; margin-top: 10px;">
+        <div style="font-weight: bold; margin-bottom: 5px; color: var(--accent, #00ff66);">LAATST OPGESLAGEN METING:</div>
+        <div id="bp-history" style="background: #000; padding: 8px; border: 1px solid rgba(255,255,255,0.2); min-height: 40px;">
+            Geen recente meting geladen.
+        </div>
+    </div>
+</div>
+
+<script>
+    async function analyseAndSave() {
+        let sys = parseFloat(document.getElementById('sys-input').value);
+        let dia = parseFloat(document.getElementById('dia-input').value);
+        let hr = parseFloat(document.getElementById('hr-input').value);
+        let uf = parseFloat(document.getElementById('uf-input').value);
+
+        if (isNaN(sys) || isNaN(dia) || isNaN(hr)) {
+            alert("Vul alstublieft minimaal de bloeddruk (sys/dia) en hartslag in.");
+            return;
+        }
+
+        // --- UF KLEURCODERING LOGICA ---
+        let ufStatusText = "";
+        let ufBgColor = "";
+        let ufTextColor = "#ffffff";
+
+        if (!isNaN(uf)) {
+            if (uf >= 4.5) {
+                ufStatusText = "UF ADVIES: " + uf + "L - KRITISCH HOOG (ROOD)";
+                ufBgColor = "#ff2222";
+            } else if (uf >= 4.0) {
+                ufStatusText = "UF ADVIES: " + uf + "L - WAARSCHUWING (ORANJE)";
+                ufBgColor = "#ff9900";
+                ufTextColor = "#000000";
+            } else {
+                ufStatusText = "UF ADVIES: " + uf + "L - VEILIG (GROEN)";
+                ufBgColor = "#00cc44";
+                ufTextColor = "#000000";
+            }
+        }
+
+        // Toon statusbox
+        let statusBox = document.getElementById('bp-status-box');
+        let ufDiv = document.getElementById('uf-indicator');
+        let summaryDiv = document.getElementById('bp-summary');
+
+        statusBox.style.display = "block";
+        if (ufStatusText) {
+            ufDiv.style.display = "block";
+            ufDiv.style.background = ufBgColor;
+            ufDiv.style.color = ufTextColor;
+            ufDiv.innerText = ufStatusText;
+        } else {
+            ufDiv.style.display = "none";
+        }
+
+        summaryDiv.innerHTML = `
+            <b>Meting:</b> ${sys}/${dia} mmHg | <b>HR:</b> ${hr} bpm<br>
+            <span style="font-size:10px; color:#aaa;">Datum: ${new Date().toLocaleString()}</span>
+        `;
+
+        // Opslaan in Google Sheets via OS
+        let payload = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            sys: sys,
+            dia: dia,
+            hr: hr,
+            uf: uf || 0
+        });
+
+        // Bepaal OS API (werkt op zowel retroOS als winOS)
+        let activeOS = typeof retroOS !== 'undefined' ? retroOS : (typeof winOS !== 'undefined' ? winOS : null);
+
+        if (activeOS) {
+            let success = await activeOS.saveData('bloeddruk_meting', payload);
+            if (success) {
+                document.getElementById('bp-history').innerHTML = `<b>Succesvol opgeslagen:</b> ${sys}/${dia} mmHg, HR: ${hr} bpm, UF: ${uf || '-'}L`;
+            }
+        } else {
+            alert("Systeeminformatie: Kan geen actieve OS cloud verbinding vinden.");
+        }
+    }
+
+    async function loadBloodPressureHistory() {
+        let activeOS = typeof retroOS !== 'undefined' ? retroOS : (typeof winOS !== 'undefined' ? winOS : null);
+        if (activeOS) {
+            let data = await activeOS.loadData();
+            if (data['bloeddruk_meting']) {
+                try {
+                    let meting = JSON.parse(data['bloeddruk_meting']);
+                    document.getElementById('bp-history').innerHTML = `
+                        <b>Meting van ${new Date(meting.timestamp).toLocaleDateString()}:</b><br>
+                        Bloeddruk: ${meting.sys}/${meting.dia} mmHg | Hartslag: ${meting.hr} bpm | UF: ${meting.uf}L
+                    `;
+                } catch(e) {
+                    document.getElementById('bp-history').innerText = data['bloeddruk_meting'];
+                }
+            } else {
+                document.getElementById('bp-history').innerText = "Geen eerdere metingen gevonden in Google Sheet.";
+            }
+        }
+    }
+</script>

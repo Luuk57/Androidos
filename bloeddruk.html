@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows RT - Network Edition</title>
+    <style>
+        :root {
+            --rt-blue: #0078d7;
+            --rt-tile-bg: rgba(0, 120, 215, 0.85);
+            --rt-dark: #1b1b1b;
+            --rt-light: #f2f2f2;
+            --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #005a9e; color: var(--rt-light); }
+
+        /* Achtergrond */
+        #wallpaper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0078d7 0%, #104175 100%);
+            z-index: 0;
+        }
+
+        /* Inlogscherm */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #004b87, #002e53);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.4s ease;
+        }
+        .lock-card {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 50px; text-align: center; width: 380px; backdrop-filter: blur(10px);
+        }
+        .lock-avatar {
+            width: 90px; height: 90px; background: #fff; color: #0078d7; border-radius: 50%;
+            margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;
+            font-size: 38px; font-weight: bold;
+        }
+        .lock-card input {
+            width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 15px; outline: none; text-align: center;
+        }
+        .lock-card input::placeholder { color: rgba(255,255,255,0.6); }
+        .lock-card button {
+            width: 100%; padding: 12px; background: var(--rt-blue); border: none;
+            color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .lock-card button:hover { background: #0063b1; }
+
+        /* Desktop Omgeving */
+        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
+
+        /* Metro Startscherm (Tegels) */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 48px);
+            padding: 40px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+        }
+        .start-header { font-size: 32px; font-weight: 300; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .tiles-grid { display: flex; gap: 15px; flex-wrap: wrap; }
+        
+        .rt-tile {
+            width: 160px; height: 160px; background: var(--rt-tile-bg); padding: 15px;
+            display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+            transition: transform 0.15s, background 0.15s; border: 2px solid transparent;
+        }
+        .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
+        .rt-tile span { font-size: 32px; }
+        .rt-tile label { font-size: 14px; font-weight: 500; cursor: pointer; }
+
+        /* Taakbalk */
+        .taskbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); display: flex;
+            align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000;
+        }
+        .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 4px; }
+        .taskbar-btn {
+            background: transparent; border: none; color: #fff; padding: 8px 14px;
+            cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .taskbar-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .sys-tray { font-size: 12px; color: #ddd; padding: 6px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .sys-tray:hover { background: rgba(255,255,255,0.1); }
+
+        /* Venstersysteem */
+        .window {
+            position: absolute; top: 60px; left: 100px; width: 650px; height: 480px;
+            background: #ffffff; color: #000000; border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; resize: both; z-index: 10;
+        }
+        .window-header {
+            background: #f3f3f3; padding: 10px 15px; display: flex;
+            justify-content: space-between; align-items: center; cursor: move; user-select: none;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .window-title { font-size: 13px; font-weight: 600; color: #333; }
+        .window-controls { display: flex; align-items: center; gap: 2px; }
+        .window-controls button {
+            background: none; border: none; width: 36px; height: 28px; cursor: pointer;
+            font-size: 13px; color: #333; display: flex; align-items: center; justify-content: center; transition: 0.1s;
+        }
+        .window-controls button:hover { background: rgba(0,0,0,0.08); }
+        .window-controls .btn-close:hover { background: #e81123; color: #fff; }
+        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
+
+        /* PC-Instellingen Popup */
+        .settings-popup {
+            position: absolute; bottom: 60px; right: 20px; width: 340px;
+            background: rgba(27, 27, 27, 0.95); border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px; z-index: 2000; display: none; backdrop-filter: blur(15px);
+        }
+        .settings-popup label { display: block; margin-bottom: 12px; font-size: 12px; color: #ccc; }
+        .settings-popup input[type="text"] { width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-top: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="wallpaper"></div>
+
+    <!-- Inlogscherm -->
+    <div id="lock-screen">
+        <div class="lock-card">
+            <div class="lock-avatar">RT</div>
+            <h2 style="font-weight: 400; margin-bottom: 5px; font-size: 20px;">Windows RT</h2>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">Network User</p>
+            <input type="password" id="pass-input" placeholder="Wachtwoord invoeren..." autofocus>
+            <button onclick="rtOS.login()">Aanmelden</button>
+            <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:15px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
+        </div>
+    </div>
+
+    <!-- Desktop -->
+    <div id="desktop">
+        <!-- Metro Startscherm -->
+        <div id="start-screen">
+            <div class="start-header">Start</div>
+            <div class="tiles-grid">
+                <div class="rt-tile" onclick="rtOS.openAppPrompt()">
+                    <span>➕</span>
+                    <label>App Laden (.html)</label>
+                </div>
+                <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
+                    <span>⚙️</span>
+                    <label>Instellingen</label>
+                </div>
+                <div class="rt-tile" onclick="rtOS.toggleFullscreen()" style="background: #3d9970;">
+                    <span>📺</span>
+                    <label>Volledig Scherm (F11)</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taakbalk -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
+                <button class="taskbar-btn" onclick="rtOS.openAppPrompt()">+ App Laden</button>
+            </div>
+            <div class="taskbar-right">
+                <div class="sys-tray" onclick="rtOS.openSettings()" title="Systeemstatus">
+                    <span>🔊 🌐 ☁️</span>
+                    <span id="system-time">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instellingen Popup -->
+        <div id="settings-panel" class="settings-popup">
+            <h3 style="font-size: 14px; margin-bottom: 15px; color: #fff; font-weight: 500;">Pc-instellingen</h3>
+            <label>
+                <input type="checkbox" id="login-toggle-check" onchange="rtOS.toggleLoginSetting(this)"> Inlogscherm tonen bij opstarten
+            </label>
+            <label>
+                Google Sheets Webhook URL:
+                <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            </label>
+            <button class="taskbar-btn" style="width:100%; justify-content:center; background:var(--rt-blue); color:#fff; margin-top:10px;" onclick="rtOS.saveSettings()">Opslaan</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- GELUIDSENGINE --- */
+        const SoundFX = {
+            ctx: null,
+            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            play(freq, duration, type='sine') {
+                try {
+                    this.init();
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            startup() { [440, 554.37, 659.25].forEach((f, i) => setTimeout(() => this.play(f, 0.1, 'triangle'), i * 90)); },
+            click() { this.play(750, 0.02, 'sine'); }
+        };
+
+        class WindowsRT {
+            constructor() {
+                this.loginEnabled = localStorage.getItem('rt_login') !== 'false';
+                this.sheetsUrl = localStorage.getItem('rt_sheets') || '';
+
+                document.getElementById('sheets-url-input').value = this.sheetsUrl;
+                document.getElementById('login-toggle-check').checked = this.loginEnabled;
+
+                // Luister naar F11 voor vol scherm
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'F11') {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                    }
+                });
+
+                if (!this.loginEnabled) {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    document.getElementById('desktop').style.display = 'block';
+                    SoundFX.startup();
+                    this.requestFullscreen();
+                }
+
+                setInterval(() => {
+                    let d = new Date();
+                    document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }, 1000);
+            }
+
+            requestFullscreen() {
+                try {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    }
+                } catch(e) {}
+            }
+
+            toggleFullscreen() {
+                SoundFX.click();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            }
+
+            login() {
+                SoundFX.play(600, 0.1);
+                document.getElementById('lock-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    document.getElementById('desktop').style.display = 'block';
+                    SoundFX.startup();
+                    this.requestFullscreen();
+                }, 400);
+            }
+
+            toggleLogin(enabled) {
+                this.loginEnabled = enabled;
+                localStorage.setItem('rt_login', enabled);
+                if(!enabled) this.login();
+            }
+
+            toggleLoginSetting(el) {
+                this.toggleLogin(el.checked);
+            }
+
+            toggleStartScreen() {
+                SoundFX.click();
+                let start = document.getElementById('start-screen');
+                start.style.display = start.style.display === 'none' ? 'flex' : 'none';
+            }
+
+            openSettings() {
+                SoundFX.click();
+                let panel = document.getElementById('settings-panel');
+                panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+            }
+
+            saveSettings() {
+                this.sheetsUrl = document.getElementById('sheets-url-input').value;
+                localStorage.setItem('rt_sheets', this.sheetsUrl);
+                SoundFX.click();
+                this.openSettings();
+            }
+
+            async saveData(key, value) {
+                if(!this.sheetsUrl) {
+                    alert("Vul eerst je Google Sheets URL in bij PC-instellingen.");
+                    return false;
+                }
+                try {
+                    await fetch(this.sheetsUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ action: 'save', key: key, value: value })
+                    });
+                    return true;
+                } catch(e) {
+                    alert("Fout bij opslaan in Google Sheet: " + e.message);
+                    return false;
+                }
+            }
+
+            async loadData() {
+                if(!this.sheetsUrl) return {};
+                try {
+                    let res = await fetch(this.sheetsUrl);
+                    return await res.json();
+                } catch(e) {
+                    return {};
+                }
+            }
+
+            openAppPrompt() {
+                SoundFX.click();
+                let url = prompt("Voer de URL in van het HTML-bestand van je app (bijv. GitHub raw URL):");
+                if(url) this.loadHTMLApp(url);
+            }
+
+            async loadHTMLApp(url) {
+                try {
+                    SoundFX.click();
+                    document.getElementById('start-screen').style.display = 'none';
+
+                    let res = await fetch(url);
+                    let htmlContent = await res.text();
+
+                    let winId = 'win-' + Date.now();
+                    let win = document.createElement('div');
+                    win.className = 'window';
+                    win.id = winId;
+                    win.innerHTML = `
+                        <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
+                            <span class="window-title">App Venster</span>
+                            <div class="window-controls">
+                                <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
+                                <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
+                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">✕</button>
+                            </div>
+                        </div>
+                        <div class="window-content" id="content-${winId}"></div>
+                    `;
+                    document.getElementById('desktop').appendChild(win);
+                    document.getElementById(`content-${winId}`).innerHTML = htmlContent;
+
+                    let scripts = document.getElementById(`content-${winId}`).querySelectorAll('script');
+                    scripts.forEach(s => {
+                        let ns = document.createElement('script');
+                        ns.text = s.innerHTML;
+                        document.body.appendChild(ns);
+                    });
+                } catch(e) {
+                    alert("Fout bij laden van app: " + e.message);
+                }
+            }
+
+            maximizeWindow(winId) {
+                SoundFX.click();
+                let win = document.getElementById(winId);
+                if(win.dataset.maximized === 'true') {
+                    win.style.top = win.dataset.prevTop;
+                    win.style.left = win.dataset.prevLeft;
+                    win.style.width = win.dataset.prevWidth;
+                    win.style.height = win.dataset.prevHeight;
+                    win.dataset.maximized = 'false';
+                } else {
+                    win.dataset.prevTop = win.style.top;
+                    win.dataset.prevLeft = win.style.left;
+                    win.dataset.prevWidth = win.style.width;
+                    win.dataset.prevHeight = win.style.height;
+                    win.style.top = '10px';
+                    win.style.left = '10px';
+                    win.style.width = 'calc(100vw - 20px)';
+                    win.style.height = 'calc(100vh - 70px)';
+                    win.dataset.maximized = 'true';
+                }
+            }
+
+            minimizeWindow(winId) {
+                SoundFX.click();
+                document.getElementById(winId).style.display = 'none';
+            }
+
+            initDrag(e, winId) {
+                let win = document.getElementById(winId);
+                let startX = e.clientX, startY = e.clientY;
+                let startLeft = win.offsetLeft, startTop = win.offsetTop;
+
+                function onMouseMove(e) {
+                    win.style.left = (startLeft + e.clientX - startX) + 'px';
+                    win.style.top = (startTop + e.clientY - startY) + 'px';
+                }
+                document.addEventListener('mousemove', onMouseMove);
+                document.onmouseup = () => document.removeEventListener('mousemove', onMouseMove);
+            }
+        }
+
+        const rtOS = new WindowsRT();
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows RT - Direct Access Edition</title>
+    <title>Windows RT - Health Edition</title>
     <style>
         :root {
             --rt-blue: #0078d7;
@@ -39,11 +39,11 @@
             transition: transform 0.15s, background 0.15s; border: 2px solid transparent; position: relative;
         }
         .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
+        .rt-tile-wide { width: 355px; }
         .rt-tile .tile-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
         .rt-tile .tile-content { font-size: 18px; font-weight: bold; margin: auto 0; }
         .rt-tile .tile-sub { font-size: 11px; opacity: 0.7; }
         
-        /* Verwijderknop altijd zichtbaar rechtsboven op aangepaste tegels */
         .rt-tile .delete-btn {
             position: absolute; top: 6px; right: 6px; background: #e81123; color: #fff;
             border: 1px solid #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 12px;
@@ -80,7 +80,7 @@
         }
         .window-controls button:hover { background: rgba(0,0,0,0.08); }
         .window-controls .btn-close:hover { background: #e81123; color: #fff; }
-        .window-content { padding: 15px; flex-grow: 1; overflow-y: auto; background: #fff; }
+        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
 
         /* Instellingen Popup */
         .settings-popup {
@@ -103,15 +103,22 @@
             <div class="start-header">
                 <span>Start</span>
                 <div>
-                    <button onclick="rtOS.addNewTilePrompt()" style="padding: 6px 12px; background: var(--rt-blue); border: none; color: #fff; font-size: 12px; cursor: pointer; border-radius: 3px;">+ Nieuwe Tegel Toevoegen</button>
+                    <button onclick="rtOS.addNewTilePrompt()" style="padding: 6px 12px; background: var(--rt-blue); border: none; color: #fff; font-size: 12px; cursor: pointer; border-radius: 3px;">+ Extra Tegel Toevoegen</button>
                 </div>
             </div>
             
             <div class="tiles-grid" id="tiles-container">
+                <!-- VASTE LIVE TEGEL: Bloeddruk & HR -->
+                <div class="rt-tile rt-tile-wide" onclick="rtOS.openBloodPressureApp()" style="background: #0078d7;">
+                    <div class="tile-title">🫀 Bloeddruk & HR (Live Tegel)</div>
+                    <div class="tile-content" id="live-bp-display">-- / --</div>
+                    <div class="tile-sub" id="live-hr-display">Klik om in te voeren / te openen</div>
+                </div>
+
                 <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
                     <div class="tile-title">⚙️ Instellingen</div>
                     <div class="tile-content" style="font-size: 32px; text-align: center;">⚙️</div>
-                    <div class="tile-sub">Systeem & Google Sync</div>
+                    <div class="tile-sub">Google Sheets Sync</div>
                 </div>
 
                 <div class="rt-tile" onclick="rtOS.toggleFullscreen()" style="background: #3d9970;">
@@ -126,7 +133,7 @@
         <div class="taskbar">
             <div style="display:flex; gap:5px;">
                 <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
-                <button class="taskbar-btn" onclick="rtOS.addNewTilePrompt()">+ Tegel Toevoegen</button>
+                <button class="taskbar-btn" onclick="rtOS.openBloodPressureApp()">🫀 Bloeddruk App</button>
             </div>
             <div style="font-size: 12px; color: #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="rtOS.openSettings()">
                 <span>🔊 🌐 ☁️</span>
@@ -143,7 +150,7 @@
             </label>
             <button class="taskbar-btn" style="width:100%; justify-content:center; background:var(--rt-blue); color:#fff; margin-top:10px;" onclick="rtOS.saveSettings()">Opslaan</button>
             <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-            <button class="taskbar-btn" style="width:100%; justify-content:center; background:#e81123; color:#fff;" onclick="rtOS.clearAllCustomTiles()">Alle Aangepaste Tegels Wissen</button>
+            <button class="taskbar-btn" style="width:100%; justify-content:center; background:#e81123; color:#fff;" onclick="rtOS.clearAllCustomTiles()">Alle Extra Tegels Wissen</button>
         </div>
     </div>
 
@@ -188,6 +195,7 @@
                 }, 1000);
 
                 this.renderCustomTiles();
+                this.updateLiveTiles();
             }
 
             requestFullscreen() {
@@ -219,9 +227,96 @@
                 this.openSettings();
             }
 
+            /* --- DIRECTE BLOEDDRUK & HR APP IN VENSTER --- */
+            openBloodPressureApp() {
+                SoundFX.click();
+                document.getElementById('start-screen').style.display = 'none';
+
+                let winId = 'win-bp-' + Date.now();
+                let win = document.createElement('div');
+                win.className = 'window';
+                win.id = winId;
+                win.innerHTML = `
+                    <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
+                        <span class="window-title">🫀 Bloeddruk & HR Monitor</span>
+                        <div class="window-controls">
+                            <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
+                            <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
+                            <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">✕</button>
+                        </div>
+                    </div>
+                    <div class="window-content" style="padding: 20px; font-family: 'Segoe UI', sans-serif;">
+                        <h3 style="color: #0078d7; margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #0078d7; padding-bottom: 5px;">
+                            Nieuwe Meting Invoeren & Opslaan
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">SYSTOLISCH (BOVENDRUK):</label>
+                                <input type="number" id="bp-sys" placeholder="bijv. 120" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">DIASTOLISCH (ONDERDRUK):</label>
+                                <input type="number" id="bp-dia" placeholder="bijv. 80" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">HARTSLAG (HR - BPM):</label>
+                            <input type="number" id="bp-hr" placeholder="bijv. 72" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
+                        </div>
+                        <button onclick="rtOS.submitBloodPressure()" style="width: 100%; padding: 12px; background: #0078d7; color: #fff; border: none; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 4px;">
+                            OPSLAAN IN GOOGLE SHEETS
+                        </button>
+                        <div id="bp-feedback" style="margin-top: 15px; font-weight: bold; font-size: 13px; text-align: center;"></div>
+                    </div>
+                `;
+                document.getElementById('desktop').appendChild(win);
+            }
+
+            async submitBloodPressure() {
+                let sys = document.getElementById('bp-sys').value;
+                let dia = document.getElementById('bp-dia').value;
+                let hr = document.getElementById('bp-hr').value;
+
+                if(!sys || !dia || !hr) {
+                    alert("Vul alstublieft de bovendruk, onderdruk en hartslag in.");
+                    return;
+                }
+
+                let timeStr = new Date().toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
+                let payload = JSON.stringify({ sys: sys, dia: dia, hr: hr, time: timeStr });
+
+                let success = await this.saveData('laatste_bloeddruk_hr', payload);
+                let feedback = document.getElementById('bp-feedback');
+                if(success) {
+                    feedback.style.color = "green";
+                    feedback.innerText = "Succesvol opgeslagen! Live Tegel is bijgewerkt.";
+                    setTimeout(() => {
+                        document.getElementById('bp-sys').value = '';
+                        document.getElementById('bp-dia').value = '';
+                        document.getElementById('bp-hr').value = '';
+                        feedback.innerText = '';
+                    }, 3000);
+                }
+            }
+
+            async updateLiveTiles() {
+                let data = await this.loadData();
+                if(data['laatste_bloeddruk_hr']) {
+                    try {
+                        let rec = JSON.parse(data['laatste_bloeddruk_hr']);
+                        let displayBp = document.getElementById('live-bp-display');
+                        let displayHr = document.getElementById('live-hr-display');
+                        if(displayBp && displayHr) {
+                            displayBp.innerText = `${rec.sys} / ${rec.dia} mmHg`;
+                            displayHr.innerText = `HR: ${rec.hr} BPM (${rec.time || 'recent'})`;
+                        }
+                    } catch(e) {}
+                }
+            }
+
             addNewTilePrompt() {
                 SoundFX.click();
-                let title = prompt("Naam van de nieuwe tegel / app:");
+                let title = prompt("Naam van de extra tegel / app:");
                 if(!title) return;
                 let url = prompt("URL van het HTML-bestand (bijv. GitHub raw link):");
                 if(!url) return;
@@ -233,10 +328,7 @@
             }
 
             removeTile(id, e) {
-                if(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
+                if(e) { e.stopPropagation(); e.preventDefault(); }
                 SoundFX.click();
                 this.customTiles = this.customTiles.filter(t => t.id !== id);
                 localStorage.setItem('rt_tiles', JSON.stringify(this.customTiles));
@@ -244,7 +336,7 @@
             }
 
             clearAllCustomTiles() {
-                if(confirm("Weet je zeker dat je ALLE aangepaste tegels wilt wissen?")) {
+                if(confirm("Weet je zeker dat je alle extra tegels wilt wissen?")) {
                     this.customTiles = [];
                     localStorage.removeItem('rt_tiles');
                     this.renderCustomTiles();
@@ -260,9 +352,8 @@
                     let div = document.createElement('div');
                     div.className = 'rt-tile custom-tile-item';
                     div.style.background = '#85144b';
-                    div.onclick = () => this.openApp(tile.url, tile.title);
+                    div.onclick = () => this.openExternalApp(tile.url, tile.title);
                     
-                    // Rechtermuisklik optie om ook te kunnen verwijderen
                     div.oncontextmenu = (e) => {
                         e.preventDefault();
                         if(confirm(`Wil je de tegel "${tile.title}" verwijderen?`)) {
@@ -292,6 +383,7 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ action: 'save', key: key, value: value })
                     });
+                    this.updateLiveTiles();
                     return true;
                 } catch(e) {
                     alert("Fout bij opslaan in Google Sheet: " + e.message);
@@ -309,7 +401,7 @@
                 }
             }
 
-            async openApp(url, title="App") {
+            async openExternalApp(url, title="App") {
                 try {
                     SoundFX.click();
                     document.getElementById('start-screen').style.display = 'none';

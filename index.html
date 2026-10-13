@@ -3,483 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows RT - Health Edition</title>
+    <title>Dialyse Behandelingssysteem - Windows Edition</title>
     <style>
         :root {
-            --rt-blue: #0078d7;
-            --rt-tile-bg: rgba(0, 120, 215, 0.85);
-            --rt-dark: #1b1b1b;
-            --rt-light: #f2f2f2;
+            --win-blue: #0078d7;
+            --win-bg: #f3f3f3;
+            --win-dark: #202020;
+            --card-bg: #ffffff;
+            --border-color: #e1e1e1;
             --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #005a9e; color: var(--rt-light); }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: var(--win-bg); color: var(--win-dark); }
 
-        #wallpaper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #0078d7 0%, #104175 100%);
-            z-index: 0;
+        /* Windows Bovenbalk / Header */
+        .win-header {
+            height: 50px; background: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+        }
+        .win-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .win-title span { color: var(--win-blue); }
+
+        /* Dashboard Grid Layout (Verdeeld over vakken) */
+        .dashboard-container {
+            width: 100%; height: calc(100vh - 50px); padding: 20px;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 20px;
         }
 
-        #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: block; }
+        /* Vak / Dashboard Kaart */
+        .dashboard-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 4px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .card-header {
+            font-size: 14px; font-weight: 600; color: var(--win-blue);
+            margin-bottom: 15px; border-bottom: 2px solid var(--win-blue); padding-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
 
-        /* Metro Startscherm & Tegel Grid */
-        #start-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 48px);
-            padding: 30px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; z-index: 5;
+        /* Formulier elementen binnen vak 1 */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; }
+        .form-group input {
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; background: #fafafa;
         }
-        .start-header { font-size: 28px; font-weight: 300; display: flex; justify-content: space-between; align-items: center; }
-        .tiles-grid { display: flex; gap: 15px; flex-wrap: wrap; }
+        .form-group input:focus { background: #fff; border-color: var(--win-blue); outline: none; }
 
-        /* Tegels */
-        .rt-tile {
-            width: 170px; height: 170px; background: var(--rt-tile-bg); padding: 12px;
-            display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
-            transition: transform 0.15s, background 0.15s; border: 2px solid transparent; position: relative;
+        /* Berekende resultaten / statistieken vlak */
+        .calc-box {
+            background: #eef6fc; border-left: 4px solid var(--win-blue);
+            padding: 10px; margin-top: 10px; font-size: 12px; line-height: 1.5;
         }
-        .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
-        .rt-tile-wide { width: 355px; }
-        .rt-tile .tile-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
-        .rt-tile .tile-content { font-size: 18px; font-weight: bold; margin: auto 0; }
-        .rt-tile .tile-sub { font-size: 11px; opacity: 0.7; }
-        
-        .rt-tile .delete-btn {
-            position: absolute; top: 6px; right: 6px; background: #e81123; color: #fff;
-            border: 1px solid #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 12px;
-            font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-        }
-        .rt-tile .delete-btn:hover { background: #ff2a3b; transform: scale(1.1); }
+        .calc-box b { color: #000; }
 
-        /* Taakbalk */
-        .taskbar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex;
-            align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000;
+        .btn-action {
+            margin-top: 10px; padding: 10px; background: var(--win-blue); color: #fff;
+            border: none; border-radius: 3px; font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s;
         }
-        .taskbar-btn {
-            background: transparent; border: none; color: #fff; padding: 8px 12px;
-            cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
-        }
-        .taskbar-btn:hover { background: rgba(255, 255, 255, 0.1); }
-
-        /* Venster Systeem */
-        .window {
-            position: absolute; top: 50px; left: 80px; width: 620px; height: 480px;
-            background: #ffffff; color: #000; border: 1px solid rgba(0,0,0,0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; resize: both; z-index: 20;
-        }
-        .window-header {
-            background: #f3f3f3; padding: 8px 12px; display: flex;
-            justify-content: space-between; align-items: center; cursor: move; user-select: none; border-bottom: 1px solid #ddd;
-        }
-        .window-title { font-size: 13px; font-weight: 600; color: #333; }
-        .window-controls button {
-            background: none; border: none; width: 32px; height: 26px; cursor: pointer; font-size: 12px; color: #333;
-        }
-        .window-controls button:hover { background: rgba(0,0,0,0.08); }
-        .window-controls .btn-close:hover { background: #e81123; color: #fff; }
-        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
-
-        /* Instellingen Popup */
-        .settings-popup {
-            position: absolute; bottom: 60px; right: 20px; width: 340px;
-            background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255,255,255,0.2);
-            padding: 20px; z-index: 2000; display: none; backdrop-filter: blur(15px);
-        }
-        .settings-popup label { display: block; margin-bottom: 12px; font-size: 12px; color: #ccc; }
-        .settings-popup input[type="text"] { width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-top: 4px; font-size: 12px; }
+        .btn-action:hover { background: #005a9e; }
     </style>
 </head>
 <body>
 
-    <div id="wallpaper"></div>
+    <!-- Windows Koptekst -->
+    <div class="win-header">
+        <div class="win-title">
+            <span>🪟</span> DIALYSE COMMAND CENTER <span>// VAK 1: BEHANDELING</span>
+        </div>
+        <div id="system-clock" style="font-size: 13px; font-weight: 500; color: #666;"></div>
+    </div>
 
-    <!-- Desktop -->
-    <div id="desktop">
-        <!-- Startscherm met Tegels -->
-        <div id="start-screen">
-            <div class="start-header">
-                <span>Start</span>
-                <div>
-                    <button onclick="rtOS.addNewTilePrompt()" style="padding: 6px 12px; background: var(--rt-blue); border: none; color: #fff; font-size: 12px; cursor: pointer; border-radius: 3px;">+ Extra Tegel Toevoegen</button>
-                </div>
+    <!-- Dashboard Raster -->
+    <div class="dashboard-container">
+        
+        <!-- VAK 1: BEHANDELING -->
+        <div class="dashboard-card" style="grid-column: span 1; grid-row: span 2;">
+            <div class="card-header">Vak 1: Behandeling & Tijden</div>
+            
+            <div class="form-group">
+                <label>Afspraak Datum & Tijd:</label>
+                <input type="datetime-local" id="t-afspraak" oninput="berekenTijden()">
             </div>
             
-            <div class="tiles-grid" id="tiles-container">
-                <!-- VASTE LIVE TEGEL: Bloeddruk & HR -->
-                <div class="rt-tile rt-tile-wide" onclick="rtOS.openBloodPressureApp()" style="background: #0078d7;">
-                    <div class="tile-title">🫀 Bloeddruk & HR (Live Tegel)</div>
-                    <div class="tile-content" id="live-bp-display">-- / --</div>
-                    <div class="tile-sub" id="live-hr-display">Klik om in te voeren / te openen</div>
-                </div>
-
-                <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
-                    <div class="tile-title">⚙️ Instellingen</div>
-                    <div class="tile-content" style="font-size: 32px; text-align: center;">⚙️</div>
-                    <div class="tile-sub">Google Sheets Sync</div>
-                </div>
-
-                <div class="rt-tile" onclick="rtOS.toggleFullscreen()" style="background: #3d9970;">
-                    <div class="tile-title">📺 Volledig Scherm</div>
-                    <div class="tile-content" style="font-size: 32px; text-align: center;">🖥️</div>
-                    <div class="tile-sub">F11 / Schermgrootte</div>
-                </div>
+            <div class="form-group">
+                <label>Daadwerkelijke Aansluit Tijd:</label>
+                <input type="datetime-local" id="t-aansluit" oninput="berekenTijden()">
             </div>
+
+            <div class="form-group">
+                <label>Daadwerkelijke Afsluit Tijd:</label>
+                <input type="datetime-local" id="t-afsluit" oninput="berekenTijden()">
+            </div>
+
+            <!-- Berekende resultaten -->
+            <div class="calc-box" id="resultaten-tijden">
+                <b>Duur Behandeling:</b> nog niet berekend<br>
+                <b>Verschil met Afspraak:</b> nog niet berekend
+            </div>
+
+            <button class="btn-action" onclick="slaBehandelingOp()">BEHANDELING OPSLAAN</button>
         </div>
 
-        <!-- Taakbalk -->
-        <div class="taskbar">
-            <div style="display:flex; gap:5px;">
-                <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
-                <button class="taskbar-btn" onclick="rtOS.openBloodPressureApp()">🫀 Bloeddruk App</button>
-            </div>
-            <div style="font-size: 12px; color: #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="rtOS.openSettings()">
-                <span>🔊 🌐 ☁️</span>
-                <span id="system-time">00:00</span>
-            </div>
+        <!-- VAK 2: (Toekomstig uit te breiden) -->
+        <div class="dashboard-card">
+            <div class="card-header">Vak 2: Vocht / UF & Gewicht</div>
+            <p style="font-size: 12px; color: #777;">Wordt hierna ingericht...</p>
         </div>
 
-        <!-- Instellingen Popup -->
-        <div id="settings-panel" class="settings-popup">
-            <h3 style="font-size: 14px; margin-bottom: 15px; color: #fff; font-weight: 500;">Pc-instellingen</h3>
-            <label>
-                Google Sheets Webhook URL:
-                <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec">
-            </label>
-            <button class="taskbar-btn" style="width:100%; justify-content:center; background:var(--rt-blue); color:#fff; margin-top:10px;" onclick="rtOS.saveSettings()">Opslaan</button>
-            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-            <button class="taskbar-btn" style="width:100%; justify-content:center; background:#e81123; color:#fff;" onclick="rtOS.clearAllCustomTiles()">Alle Extra Tegels Wissen</button>
+        <!-- VAK 3: (Toekomstig uit te breiden) -->
+        <div class="dashboard-card">
+            <div class="card-header">Vak 3: Bloeddruk & Hartslag</div>
+            <p style="font-size: 12px; color: #777;">Wordt hierna ingericht...</p>
         </div>
+
+        <!-- VAK 4: (Toekomstig uit te breiden) -->
+        <div class="dashboard-card">
+            <div class="card-header">Vak 4: Medicatie & Notities</div>
+            <p style="font-size: 12px; color: #777;">Wordt hierna ingericht...</p>
+        </div>
+
+        <!-- VAK 5: (Toekomstig uit te breiden) -->
+        <div class="dashboard-card">
+            <div class="card-header">Vak 5: Overzicht / Google Sync</div>
+            <p style="font-size: 12px; color: #777;">Wordt hierna ingericht...</p>
+        </div>
+
     </div>
 
     <script>
-        /* --- AUDIO FX --- */
-        const SoundFX = {
-            ctx: null,
-            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-            play(freq, duration, type='sine') {
-                try {
-                    this.init();
-                    let osc = this.ctx.createOscillator();
-                    let gain = this.ctx.createGain();
-                    osc.type = type; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(); osc.stop(this.ctx.currentTime + duration);
-                } catch(e) {}
-            },
-            startup() { [440, 554.37, 659.25].forEach((f, i) => setTimeout(() => this.play(f, 0.1, 'triangle'), i * 90)); },
-            click() { this.play(750, 0.02, 'sine'); }
-        };
+        // Systeem klok in de header
+        setInterval(() => {
+            document.getElementById('system-clock').innerText = new Date().toLocaleString();
+        }, 1000);
 
-        class WindowsRT {
-            constructor() {
-                this.sheetsUrl = localStorage.getItem('rt_sheets') || '';
-                this.customTiles = JSON.parse(localStorage.getItem('rt_tiles') || '[]');
+        // Automatische tijdberekeningen zodra velden wijzigen
+        function berekenTijden() {
+            let afspraakVal = document.getElementById('t-afspraak').value;
+            let aansluitVal = document.getElementById('t-aansluit').value;
+            let afsluitVal = document.getElementById('t-afsluit').value;
 
-                document.getElementById('sheets-url-input').value = this.sheetsUrl;
+            let resBox = document.getElementById('resultaten-tijden');
 
-                window.addEventListener('keydown', (e) => {
-                    if (e.key === 'F11') { e.preventDefault(); this.toggleFullscreen(); }
-                });
+            let duurTekst = "Niet volledig ingevuld";
+            let verschilTekst = "Niet volledig ingevuld";
 
-                SoundFX.startup();
-                this.requestFullscreen();
-
-                setInterval(() => {
-                    let d = new Date();
-                    document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                }, 1000);
-
-                this.renderCustomTiles();
-                this.updateLiveTiles();
-            }
-
-            requestFullscreen() {
-                try { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); } catch(e) {}
-            }
-
-            toggleFullscreen() {
-                SoundFX.click();
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else if (document.exitFullscreen) document.exitFullscreen();
-            }
-
-            toggleStartScreen() {
-                SoundFX.click();
-                let start = document.getElementById('start-screen');
-                start.style.display = start.style.display === 'none' ? 'flex' : 'none';
-            }
-
-            openSettings() {
-                SoundFX.click();
-                let panel = document.getElementById('settings-panel');
-                panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            }
-
-            saveSettings() {
-                this.sheetsUrl = document.getElementById('sheets-url-input').value;
-                localStorage.setItem('rt_sheets', this.sheetsUrl);
-                SoundFX.click();
-                this.openSettings();
-            }
-
-            /* --- DIRECTE BLOEDDRUK & HR APP IN VENSTER --- */
-            openBloodPressureApp() {
-                SoundFX.click();
-                document.getElementById('start-screen').style.display = 'none';
-
-                let winId = 'win-bp-' + Date.now();
-                let win = document.createElement('div');
-                win.className = 'window';
-                win.id = winId;
-                win.innerHTML = `
-                    <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
-                        <span class="window-title">🫀 Bloeddruk & HR Monitor</span>
-                        <div class="window-controls">
-                            <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
-                            <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
-                            <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">✕</button>
-                        </div>
-                    </div>
-                    <div class="window-content" style="padding: 20px; font-family: 'Segoe UI', sans-serif;">
-                        <h3 style="color: #0078d7; margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #0078d7; padding-bottom: 5px;">
-                            Nieuwe Meting Invoeren & Opslaan
-                        </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">SYSTOLISCH (BOVENDRUK):</label>
-                                <input type="number" id="bp-sys" placeholder="bijv. 120" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">DIASTOLISCH (ONDERDRUK):</label>
-                                <input type="number" id="bp-dia" placeholder="bijv. 80" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">HARTSLAG (HR - BPM):</label>
-                            <input type="number" id="bp-hr" placeholder="bijv. 72" style="width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 14px;">
-                        </div>
-                        <button onclick="rtOS.submitBloodPressure()" style="width: 100%; padding: 12px; background: #0078d7; color: #fff; border: none; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 4px;">
-                            OPSLAAN IN GOOGLE SHEETS
-                        </button>
-                        <div id="bp-feedback" style="margin-top: 15px; font-weight: bold; font-size: 13px; text-align: center;"></div>
-                    </div>
-                `;
-                document.getElementById('desktop').appendChild(win);
-            }
-
-            async submitBloodPressure() {
-                let sys = document.getElementById('bp-sys').value;
-                let dia = document.getElementById('bp-dia').value;
-                let hr = document.getElementById('bp-hr').value;
-
-                if(!sys || !dia || !hr) {
-                    alert("Vul alstublieft de bovendruk, onderdruk en hartslag in.");
-                    return;
-                }
-
-                let timeStr = new Date().toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
-                let payload = JSON.stringify({ sys: sys, dia: dia, hr: hr, time: timeStr });
-
-                let success = await this.saveData('laatste_bloeddruk_hr', payload);
-                let feedback = document.getElementById('bp-feedback');
-                if(success) {
-                    feedback.style.color = "green";
-                    feedback.innerText = "Succesvol opgeslagen! Live Tegel is bijgewerkt.";
-                    setTimeout(() => {
-                        document.getElementById('bp-sys').value = '';
-                        document.getElementById('bp-dia').value = '';
-                        document.getElementById('bp-hr').value = '';
-                        feedback.innerText = '';
-                    }, 3000);
-                }
-            }
-
-            async updateLiveTiles() {
-                let data = await this.loadData();
-                if(data['laatste_bloeddruk_hr']) {
-                    try {
-                        let rec = JSON.parse(data['laatste_bloeddruk_hr']);
-                        let displayBp = document.getElementById('live-bp-display');
-                        let displayHr = document.getElementById('live-hr-display');
-                        if(displayBp && displayHr) {
-                            displayBp.innerText = `${rec.sys} / ${rec.dia} mmHg`;
-                            displayHr.innerText = `HR: ${rec.hr} BPM (${rec.time || 'recent'})`;
-                        }
-                    } catch(e) {}
-                }
-            }
-
-            addNewTilePrompt() {
-                SoundFX.click();
-                let title = prompt("Naam van de extra tegel / app:");
-                if(!title) return;
-                let url = prompt("URL van het HTML-bestand (bijv. GitHub raw link):");
-                if(!url) return;
-
-                let tile = { id: 'tile-' + Date.now(), title: title, url: url };
-                this.customTiles.push(tile);
-                localStorage.setItem('rt_tiles', JSON.stringify(this.customTiles));
-                this.renderCustomTiles();
-            }
-
-            removeTile(id, e) {
-                if(e) { e.stopPropagation(); e.preventDefault(); }
-                SoundFX.click();
-                this.customTiles = this.customTiles.filter(t => t.id !== id);
-                localStorage.setItem('rt_tiles', JSON.stringify(this.customTiles));
-                this.renderCustomTiles();
-            }
-
-            clearAllCustomTiles() {
-                if(confirm("Weet je zeker dat je alle extra tegels wilt wissen?")) {
-                    this.customTiles = [];
-                    localStorage.removeItem('rt_tiles');
-                    this.renderCustomTiles();
-                    this.openSettings();
-                }
-            }
-
-            renderCustomTiles() {
-                let container = document.getElementById('tiles-container');
-                document.querySelectorAll('.custom-tile-item').forEach(el => el.remove());
-
-                this.customTiles.forEach(tile => {
-                    let div = document.createElement('div');
-                    div.className = 'rt-tile custom-tile-item';
-                    div.style.background = '#85144b';
-                    div.onclick = () => this.openExternalApp(tile.url, tile.title);
-                    
-                    div.oncontextmenu = (e) => {
-                        e.preventDefault();
-                        if(confirm(`Wil je de tegel "${tile.title}" verwijderen?`)) {
-                            this.removeTile(tile.id, e);
-                        }
-                    };
-
-                    div.innerHTML = `
-                        <button class="delete-btn" onclick="rtOS.removeTile('${tile.id}', event)" title="Tegel Verwijderen">✕</button>
-                        <div class="tile-title">📱 ${tile.title}</div>
-                        <div class="tile-content" style="font-size:24px; text-align:center;">📄</div>
-                        <div class="tile-sub">Klik om te openen</div>
-                    `;
-                    container.appendChild(div);
-                });
-            }
-
-            async saveData(key, value) {
-                if(!this.sheetsUrl) {
-                    alert("Vul eerst je Google Sheets URL in bij PC-instellingen.");
-                    return false;
-                }
-                try {
-                    await fetch(this.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ action: 'save', key: key, value: value })
-                    });
-                    this.updateLiveTiles();
-                    return true;
-                } catch(e) {
-                    alert("Fout bij opslaan in Google Sheet: " + e.message);
-                    return false;
-                }
-            }
-
-            async loadData() {
-                if(!this.sheetsUrl) return {};
-                try {
-                    let res = await fetch(this.sheetsUrl);
-                    return await res.json();
-                } catch(e) {
-                    return {};
-                }
-            }
-
-            async openExternalApp(url, title="App") {
-                try {
-                    SoundFX.click();
-                    document.getElementById('start-screen').style.display = 'none';
-
-                    let res = await fetch(url);
-                    let htmlContent = await res.text();
-
-                    let winId = 'win-' + Date.now();
-                    let win = document.createElement('div');
-                    win.className = 'window';
-                    win.id = winId;
-                    win.innerHTML = `
-                        <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
-                            <span class="window-title">${title}</span>
-                            <div class="window-controls">
-                                <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
-                                <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
-                                <button class="btn-close" onclick="document.getElementById('${winId}').remove()" title="Sluiten">✕</button>
-                            </div>
-                        </div>
-                        <div class="window-content" id="content-${winId}"></div>
-                    `;
-                    document.getElementById('desktop').appendChild(win);
-                    document.getElementById(`content-${winId}`).innerHTML = htmlContent;
-
-                    let scripts = document.getElementById(`content-${winId}`).querySelectorAll('script');
-                    scripts.forEach(s => {
-                        let ns = document.createElement('script');
-                        ns.text = s.innerHTML;
-                        document.body.appendChild(ns);
-                    });
-                } catch(e) {
-                    alert("Fout bij laden van app: " + e.message);
-                }
-            }
-
-            maximizeWindow(winId) {
-                SoundFX.click();
-                let win = document.getElementById(winId);
-                if(win.dataset.maximized === 'true') {
-                    win.style.top = win.dataset.prevTop;
-                    win.style.left = win.dataset.prevLeft;
-                    win.style.width = win.dataset.prevWidth;
-                    win.style.height = win.dataset.prevHeight;
-                    win.dataset.maximized = 'false';
+            // 1. Bereken Duur Behandeling (Afsluit - Aansluit)
+            if (aansluitVal && afsluitVal) {
+                let aansluit = new Date(aansluitVal);
+                let afsluit = new Date(afsluitVal);
+                let diffMs = afsluit - aansluit;
+                
+                if (diffMs > 0) {
+                    let uren = Math.floor(diffMs / (1000 * 60 * 60));
+                    let minuten = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    duurTekst = `${uren} uur en ${minuten} minuten`;
                 } else {
-                    win.dataset.prevTop = win.style.top;
-                    win.dataset.prevLeft = win.style.left;
-                    win.dataset.prevWidth = win.style.width;
-                    win.dataset.prevHeight = win.style.height;
-                    win.style.top = '10px';
-                    win.style.left = '10px';
-                    win.style.width = 'calc(100vw - 20px)';
-                    win.style.height = 'calc(100vh - 70px)';
-                    win.dataset.maximized = 'true';
+                    duurTekst = "<span style='color:red;'>Afsluiting moet na aansluiting zijn!</span>";
                 }
             }
 
-            minimizeWindow(winId) {
-                SoundFX.click();
-                document.getElementById(winId).style.display = 'none';
-            }
-
-            initDrag(e, winId) {
-                let win = document.getElementById(winId);
-                let startX = e.clientX, startY = e.clientY;
-                let startLeft = win.offsetLeft, startTop = win.offsetTop;
-
-                function onMouseMove(e) {
-                    win.style.left = (startLeft + e.clientX - startX) + 'px';
-                    win.style.top = (startTop + e.clientY - startY) + 'px';
+            // 2. Bereken Verschil Aansluiting met Afspraak
+            if (afspraakVal && aansluitVal) {
+                let afspraak = new Date(afspraakVal);
+                let aansluit = new Date(aansluitVal);
+                let diffAfspraakMs = aansluit - afspraak;
+                
+                let minVerschil = Math.round(diffAfspraakMs / (1000 * 60));
+                if (minVerschil === 0) {
+                    verschilTekst = "Exact op tijd! (0 min)";
+                } else if (minVerschil > 0) {
+                    verschilTekst = `<span style='color:orange;'>${minVerschil} minuten te laat</span>`;
+                } else {
+                    verschilTekst = `<span style='color:green;'>${Math.abs(minVerschil)} minuten te vroeg</span>`;
                 }
-                document.addEventListener('mousemove', onMouseMove);
-                document.onmouseup = () => document.removeEventListener('mousemove', onMouseMove);
             }
+
+            resBox.innerHTML = `
+                <b>Duur Behandeling:</b> ${duurTekst}<br>
+                <b>Verschil met Afspraak:</b> ${verschilTekst}
+            `;
         }
 
-        const rtOS = new WindowsRT();
+        function slaBehandelingOp() {
+            let data = {
+                afspraak: document.getElementById('t-afspraak').value,
+                aansluit: document.getElementById('t-aansluit').value,
+                afsluit: document.getElementById('t-afsluit').value
+            };
+            localStorage.setItem('dialyse_vak1', JSON.stringify(data));
+            alert("Behandeling (Vak 1) lokaal opgeslagen!");
+        }
+
+        // Laad eventuele eerdere data bij het opstarten
+        window.onload = () => {
+            let opgeslagen = localStorage.getItem('dialyse_vak1');
+            if (opgeslagen) {
+                let d = JSON.parse(opgeslagen);
+                if(d.afspraak) document.getElementById('t-afspraak').value = d.afspraak;
+                if(d.aansluit) document.getElementById('t-aansluit').value = d.aansluit;
+                if(d.afsluit) document.getElementById('t-afsluit').value = d.afsluit;
+                berekenTijden();
+            }
+        };
     </script>
 </body>
 </html>

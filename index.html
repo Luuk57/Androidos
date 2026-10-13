@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows RT - Network Edition</title>
+    <title>Windows RT - Live Tiles Edition</title>
     <style>
         :root {
             --rt-blue: #0078d7;
@@ -16,7 +16,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #005a9e; color: var(--rt-light); }
 
-        /* Achtergrond */
         #wallpaper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #0078d7 0%, #104175 100%);
@@ -32,84 +31,82 @@
         }
         .lock-card {
             background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 50px; text-align: center; width: 380px; backdrop-filter: blur(10px);
+            padding: 40px; text-align: center; width: 360px; backdrop-filter: blur(10px);
         }
         .lock-avatar {
-            width: 90px; height: 90px; background: #fff; color: #0078d7; border-radius: 50%;
+            width: 80px; height: 80px; background: #fff; color: #0078d7; border-radius: 50%;
             margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;
-            font-size: 38px; font-weight: bold;
+            font-size: 36px; font-weight: bold;
         }
         .lock-card input {
-            width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 15px; outline: none; text-align: center;
+            width: 100%; padding: 10px; margin-bottom: 12px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 14px; text-align: center; outline: none;
         }
-        .lock-card input::placeholder { color: rgba(255,255,255,0.6); }
         .lock-card button {
-            width: 100%; padding: 12px; background: var(--rt-blue); border: none;
-            color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s;
+            width: 100%; padding: 10px; background: var(--rt-blue); border: none;
+            color: #fff; font-weight: 600; cursor: pointer; font-size: 14px;
         }
-        .lock-card button:hover { background: #0063b1; }
 
-        /* Desktop Omgeving */
         #desktop { position: relative; width: 100%; height: 100%; z-index: 1; display: none; }
 
-        /* Metro Startscherm (Tegels) */
+        /* Metro Startscherm & Tegel Grid */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 48px);
-            padding: 40px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+            padding: 30px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
         }
-        .start-header { font-size: 32px; font-weight: 300; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .start-header { font-size: 28px; font-weight: 300; display: flex; justify-content: space-between; align-items: center; }
         .tiles-grid { display: flex; gap: 15px; flex-wrap: wrap; }
-        
+
+        /* Tegels */
         .rt-tile {
-            width: 160px; height: 160px; background: var(--rt-tile-bg); padding: 15px;
+            width: 170px; height: 170px; background: var(--rt-tile-bg); padding: 12px;
             display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
-            transition: transform 0.15s, background 0.15s; border: 2px solid transparent;
+            transition: transform 0.15s, background 0.15s; border: 2px solid transparent; position: relative;
         }
         .rt-tile:hover { background: #0063b1; border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
-        .rt-tile span { font-size: 32px; }
-        .rt-tile label { font-size: 14px; font-weight: 500; cursor: pointer; }
+        .rt-tile-wide { width: 355px; }
+        .rt-tile .tile-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+        .rt-tile .tile-content { font-size: 18px; font-weight: bold; margin: auto 0; }
+        .rt-tile .tile-sub { font-size: 11px; opacity: 0.7; }
+        .rt-tile .delete-btn {
+            position: absolute; top: 4px; right: 6px; background: rgba(0,0,0,0.5); color: #fff;
+            border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: none;
+        }
+        .rt-tile:hover .delete-btn { display: block; }
 
         /* Taakbalk */
         .taskbar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); display: flex;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: flex;
             align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000;
         }
-        .taskbar-left, .taskbar-right { display: flex; align-items: center; gap: 4px; }
         .taskbar-btn {
-            background: transparent; border: none; color: #fff; padding: 8px 14px;
-            cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            background: transparent; border: none; color: #fff; padding: 8px 12px;
+            cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
         }
         .taskbar-btn:hover { background: rgba(255, 255, 255, 0.1); }
-        .sys-tray { font-size: 12px; color: #ddd; padding: 6px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .sys-tray:hover { background: rgba(255,255,255,0.1); }
 
-        /* Venstersysteem */
+        /* Venster Systeem */
         .window {
-            position: absolute; top: 60px; left: 100px; width: 650px; height: 480px;
-            background: #ffffff; color: #000000; border: 1px solid rgba(0,0,0,0.2);
+            position: absolute; top: 50px; left: 80px; width: 620px; height: 480px;
+            background: #ffffff; color: #000; border: 1px solid rgba(0,0,0,0.2);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; resize: both; z-index: 10;
         }
         .window-header {
-            background: #f3f3f3; padding: 10px 15px; display: flex;
-            justify-content: space-between; align-items: center; cursor: move; user-select: none;
-            border-bottom: 1px solid #e1e1e1;
+            background: #f3f3f3; padding: 8px 12px; display: flex;
+            justify-content: space-between; align-items: center; cursor: move; user-select: none; border-bottom: 1px solid #ddd;
         }
-        .window-title { font-size: 13px; font-weight: 600; color: #333; }
-        .window-controls { display: flex; align-items: center; gap: 2px; }
         .window-controls button {
-            background: none; border: none; width: 36px; height: 28px; cursor: pointer;
-            font-size: 13px; color: #333; display: flex; align-items: center; justify-content: center; transition: 0.1s;
+            background: none; border: none; width: 32px; height: 26px; cursor: pointer; font-size: 12px; color: #333;
         }
         .window-controls button:hover { background: rgba(0,0,0,0.08); }
         .window-controls .btn-close:hover { background: #e81123; color: #fff; }
-        .window-content { padding: 20px; flex-grow: 1; overflow-y: auto; background: #fff; }
+        .window-content { padding: 15px; flex-grow: 1; overflow-y: auto; background: #fff; }
 
-        /* PC-Instellingen Popup */
+        /* Instellingen Popup */
         .settings-popup {
             position: absolute; bottom: 60px; right: 20px; width: 340px;
-            background: rgba(27, 27, 27, 0.95); border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255,255,255,0.2);
             padding: 20px; z-index: 2000; display: none; backdrop-filter: blur(15px);
         }
         .settings-popup label { display: block; margin-bottom: 12px; font-size: 12px; color: #ccc; }
@@ -125,45 +122,55 @@
         <div class="lock-card">
             <div class="lock-avatar">RT</div>
             <h2 style="font-weight: 400; margin-bottom: 5px; font-size: 20px;">Windows RT</h2>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 25px;">Network User</p>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 20px;">Live Tiles Edition</p>
             <input type="password" id="pass-input" placeholder="Wachtwoord invoeren..." autofocus>
             <button onclick="rtOS.login()">Aanmelden</button>
-            <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:15px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
+            <button onclick="rtOS.toggleLogin(false)" style="background:transparent; border:none; color:rgba(255,255,255,0.6); margin-top:12px; cursor:pointer; font-size:11px; text-decoration: underline;">Inlogbeveiliging uitschakelen</button>
         </div>
     </div>
 
     <!-- Desktop -->
     <div id="desktop">
-        <!-- Metro Startscherm -->
+        <!-- Startscherm met Dynamische Tegels -->
         <div id="start-screen">
-            <div class="start-header">Start</div>
-            <div class="tiles-grid">
-                <div class="rt-tile" onclick="rtOS.openAppPrompt()">
-                    <span>➕</span>
-                    <label>App Laden (.html)</label>
+            <div class="start-header">
+                <span>Start</span>
+                <div>
+                    <button onclick="rtOS.addNewTilePrompt()" style="padding: 6px 12px; background: var(--rt-blue); border: none; color: #fff; font-size: 12px; cursor: pointer; border-radius: 3px;">+ Nieuwe Tegel Toevoegen</button>
                 </div>
+            </div>
+            
+            <div class="tiles-grid" id="tiles-container">
+                <!-- Standaard Tegels -->
+                <div class="rt-tile rt-tile-wide" id="tile-bloeddruk" onclick="rtOS.openApp('apps/bloeddruk-tegel.html', 'Bloeddruk & HR')" style="background: #0078d7;">
+                    <div class="tile-title">🫀 Bloeddruk & HR (Live Tegel)</div>
+                    <div class="tile-content" id="live-bp-display">-- / --</div>
+                    <div class="tile-sub" id="live-hr-display">Klik om te openen / in te vullen</div>
+                </div>
+
                 <div class="rt-tile" onclick="rtOS.openSettings()" style="background: #001f3f;">
-                    <span>⚙️</span>
-                    <label>Instellingen</label>
+                    <div class="tile-title">⚙️ Instellingen</div>
+                    <div class="tile-content" style="font-size: 32px; text-align: center;">⚙️</div>
+                    <div class="tile-sub">Systeem & Google Sync</div>
                 </div>
+
                 <div class="rt-tile" onclick="rtOS.toggleFullscreen()" style="background: #3d9970;">
-                    <span>📺</span>
-                    <label>Volledig Scherm (F11)</label>
+                    <div class="tile-title">📺 Volledig Scherm</div>
+                    <div class="tile-content" style="font-size: 32px; text-align: center;">🖥️</div>
+                    <div class="tile-sub">F11 / Schermgrootte</div>
                 </div>
             </div>
         </div>
 
         <!-- Taakbalk -->
         <div class="taskbar">
-            <div class="taskbar-left">
+            <div style="display:flex; gap:5px;">
                 <button class="taskbar-btn" onclick="rtOS.toggleStartScreen()">❖ Start</button>
-                <button class="taskbar-btn" onclick="rtOS.openAppPrompt()">+ App Laden</button>
+                <button class="taskbar-btn" onclick="rtOS.addNewTilePrompt()">+ Tegel Toevoegen</button>
             </div>
-            <div class="taskbar-right">
-                <div class="sys-tray" onclick="rtOS.openSettings()" title="Systeemstatus">
-                    <span>🔊 🌐 ☁️</span>
-                    <span id="system-time">00:00</span>
-                </div>
+            <div style="font-size: 12px; color: #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="rtOS.openSettings()">
+                <span>🔊 🌐 ☁️</span>
+                <span id="system-time">00:00</span>
             </div>
         </div>
 
@@ -182,7 +189,7 @@
     </div>
 
     <script>
-        /* --- GELUIDSENGINE --- */
+        /* --- AUDIO FX --- */
         const SoundFX = {
             ctx: null,
             init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -206,16 +213,13 @@
             constructor() {
                 this.loginEnabled = localStorage.getItem('rt_login') !== 'false';
                 this.sheetsUrl = localStorage.getItem('rt_sheets') || '';
+                this.customTiles = JSON.parse(localStorage.getItem('rt_tiles') || '[]');
 
                 document.getElementById('sheets-url-input').value = this.sheetsUrl;
                 document.getElementById('login-toggle-check').checked = this.loginEnabled;
 
-                // Luister naar F11 voor vol scherm
                 window.addEventListener('keydown', (e) => {
-                    if (e.key === 'F11') {
-                        e.preventDefault();
-                        this.toggleFullscreen();
-                    }
+                    if (e.key === 'F11') { e.preventDefault(); this.toggleFullscreen(); }
                 });
 
                 if (!this.loginEnabled) {
@@ -229,23 +233,19 @@
                     let d = new Date();
                     document.getElementById('system-time').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 }, 1000);
+
+                this.renderCustomTiles();
+                this.updateLiveTiles();
             }
 
             requestFullscreen() {
-                try {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(() => {});
-                    }
-                } catch(e) {}
+                try { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); } catch(e) {}
             }
 
             toggleFullscreen() {
                 SoundFX.click();
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                }
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else if (document.exitFullscreen) document.exitFullscreen();
             }
 
             login() {
@@ -265,9 +265,7 @@
                 if(!enabled) this.login();
             }
 
-            toggleLoginSetting(el) {
-                this.toggleLogin(el.checked);
-            }
+            toggleLoginSetting(el) { this.toggleLogin(el.checked); }
 
             toggleStartScreen() {
                 SoundFX.click();
@@ -288,6 +286,64 @@
                 this.openSettings();
             }
 
+            /* --- DYNAMISCH TEGELS BEHEREN --- */
+            addNewTilePrompt() {
+                SoundFX.click();
+                let title = prompt("Naam van de nieuwe tegel / app:");
+                if(!title) return;
+                let url = prompt("URL van het HTML-bestand (bijv. GitHub raw link):");
+                if(!url) return;
+
+                let tile = { id: 'tile-' + Date.now(), title: title, url: url };
+                this.customTiles.push(tile);
+                localStorage.setItem('rt_tiles', JSON.stringify(this.customTiles));
+                this.renderCustomTiles();
+            }
+
+            removeTile(id, e) {
+                e.stopPropagation();
+                SoundFX.click();
+                this.customTiles = this.customTiles.filter(t => t.id !== id);
+                localStorage.setItem('rt_tiles', JSON.stringify(this.customTiles));
+                this.renderCustomTiles();
+            }
+
+            renderCustomTiles() {
+                let container = document.getElementById('tiles-container');
+                // Verwijder eerder gegenereerde custom tegels
+                document.querySelectorAll('.custom-tile-item').forEach(el => el.remove());
+
+                this.customTiles.forEach(tile => {
+                    let div = document.createElement('div');
+                    div.className = 'rt-tile custom-tile-item';
+                    div.style.background = '#85144b';
+                    div.onclick = () => this.openApp(tile.url, tile.title);
+                    div.innerHTML = `
+                        <button class="delete-btn" onclick="rtOS.removeTile('${tile.id}', event)">✕</button>
+                        <div class="tile-title">📱 ${tile.title}</div>
+                        <div class="tile-content" style="font-size:24px; text-align:center;">📄</div>
+                        <div class="tile-sub">Klik om te openen</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            /* --- LIVE TEGEL UPDATE VANUIT DATA --- */
+            async updateLiveTiles() {
+                let data = await this.loadData();
+                if (data['laatste_bloeddruk_hr']) {
+                    try {
+                        let rec = JSON.parse(data['laatste_bloeddruk_hr']);
+                        let displayBp = document.getElementById('live-bp-display');
+                        let displayHr = document.getElementById('live-hr-display');
+                        if (displayBp && displayHr) {
+                            displayBp.innerText = `${rec.sys} / ${rec.dia} mmHg`;
+                            displayHr.innerText = `HR: ${rec.hr} BPM (${rec.time || 'recent'})`;
+                        }
+                    } catch(e) {}
+                }
+            }
+
             async saveData(key, value) {
                 if(!this.sheetsUrl) {
                     alert("Vul eerst je Google Sheets URL in bij PC-instellingen.");
@@ -300,6 +356,7 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ action: 'save', key: key, value: value })
                     });
+                    this.updateLiveTiles(); // Ververs direct live tegels na opslaan
                     return true;
                 } catch(e) {
                     alert("Fout bij opslaan in Google Sheet: " + e.message);
@@ -317,13 +374,7 @@
                 }
             }
 
-            openAppPrompt() {
-                SoundFX.click();
-                let url = prompt("Voer de URL in van het HTML-bestand van je app (bijv. GitHub raw URL):");
-                if(url) this.loadHTMLApp(url);
-            }
-
-            async loadHTMLApp(url) {
+            async openApp(url, title="App") {
                 try {
                     SoundFX.click();
                     document.getElementById('start-screen').style.display = 'none';
@@ -337,7 +388,7 @@
                     win.id = winId;
                     win.innerHTML = `
                         <div class="window-header" onmousedown="rtOS.initDrag(event, '${winId}')">
-                            <span class="window-title">App Venster</span>
+                            <span class="window-title">${title}</span>
                             <div class="window-controls">
                                 <button onclick="rtOS.minimizeWindow('${winId}')" title="Minimaliseren">🗕</button>
                                 <button onclick="rtOS.maximizeWindow('${winId}')" title="Maximaliseren">🗖</button>
